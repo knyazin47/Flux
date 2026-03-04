@@ -26,9 +26,13 @@ jobs:
       - name: Restore Claude auth (OAuth)
         env:
           CLAUDE_AUTH_JSON: ${{ secrets.CLAUDE_AUTH_JSON }}
+          CLAUDE_CREDENTIALS_JSON: ${{ secrets.CLAUDE_CREDENTIALS_JSON }}
         run: |
           printf '%s' "$CLAUDE_AUTH_JSON" > ~/.claude.json
           chmod 600 ~/.claude.json
+          mkdir -p ~/.claude
+          printf '%s' "$CLAUDE_CREDENTIALS_JSON" > ~/.claude/.credentials.json
+          chmod 600 ~/.claude/.credentials.json
 
       - name: Generate questions
         run: node scripts/generate-daily.js
