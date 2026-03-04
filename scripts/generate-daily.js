@@ -46,7 +46,7 @@ function generateBatch(topic, difficulty) {
   const raw = execFileSync("claude", ["--print", prompt, "--output-format", "text"], {
     encoding: "utf-8",
     maxBuffer: 10 * 1024 * 1024,
-    timeout: 60_000, // 60 секунд на запрос
+    timeout: 180_000, // 3 минуты на запрос
   });
 
   // Убираем возможные markdown-блоки ```json ... ```
