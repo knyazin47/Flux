@@ -2,7 +2,7 @@ name: Generate Daily Questions
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # 06:00 UTC = 09:00 Minsk
+    - cron: '43 2 * * *'   # 06:00 UTC = 09:00 Minsk
   workflow_dispatch:       # allow manual run
 
 jobs:
