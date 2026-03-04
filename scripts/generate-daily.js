@@ -46,7 +46,7 @@ function generateBatch(topic, difficulty) {
   const raw = execFileSync("claude", ["--print", prompt, "--output-format", "text"], {
     encoding: "utf-8",
     maxBuffer: 10 * 1024 * 1024,
-    timeout: 180_000, // 3 минуты на запрос
+    timeout: 300_000, // 5 минут на запрос
   });
 
   // Убираем возможные markdown-блоки ```json ... ```
@@ -59,6 +59,22 @@ function generateBatch(topic, difficulty) {
     ...q,
     id: q.id || `${topic.slice(0, 4)}_d${difficulty}_${i}`,
   }));
+}
+
+async function generateBatchWithRetry(topic, difficulty, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return generateBatch(topic, difficulty);
+    } catch (err) {
+      if (attempt < maxRetries) {
+        console.log(`\n    ↻ Попытка ${attempt + 1}/${maxRetries}...`);
+        process.stdout.write(`  ${topic} (${difficulty === 1 ? "лёгкий" : "средний"})... `);
+        await sleep(5000);
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 async function main() {
@@ -82,7 +98,7 @@ async function main() {
       process.stdout.write(`  ${topic} (${label})... `);
 
       try {
-        const questions = generateBatch(topic, difficulty);
+        const questions = await generateBatchWithRetry(topic, difficulty);
         result.questions[topic][difficulty] = questions;
         totalGenerated += questions.length;
         console.log(`✓ ${questions.length} вопросов`);
