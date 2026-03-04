@@ -2,30 +2,32 @@ name: Generate Daily Questions
 
 on:
   schedule:
-    - cron: "0 6 * * *"   # 06:00 UTC = 09:00 Минск
-  workflow_dispatch:        # ручной запуск из GitHub UI
+    - cron: '0 6 * * *'   # 06:00 UTC = 09:00 Minsk
+  workflow_dispatch:       # allow manual run
 
 jobs:
   generate:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js 20
+      - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install Claude CLI
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Restore Claude auth (OAuth)
+        env:
+          CLAUDE_AUTH_JSON: ${{ secrets.CLAUDE_AUTH_JSON }}
         run: |
-          echo '${{ secrets.CLAUDE_AUTH_JSON }}' > ~/.claude.json
+          printf '%s' "$CLAUDE_AUTH_JSON" > ~/.claude.json
           chmod 600 ~/.claude.json
 
       - name: Generate questions
@@ -36,5 +38,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add frontend/public/daily-questions.json
-          git diff --staged --quiet || git commit -m "chore: daily questions $(date -u +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "chore: update daily questions [skip ci]"
           git push
