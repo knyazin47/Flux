@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import json; f=open\\(''d:/ClaudeCode/Physics/data/formulas.json'',''r'',encoding=''utf-8''\\); data=json.load\\(f\\); f.close\\(\\); total=0; [print\\(f''{t[\"\"name\"\"]}: {len\\(t[\"\"formulas\"\"]\\)} формул''\\) or total.__add__\\(len\\(t[''formulas'']\\)\\) for t in data[''topics'']]; print\\(''ИТОГО:'', sum\\(len\\(t[''formulas'']\\) for t in data[''topics'']\\)\\); print\\(''Разделов:'', len\\(data[''topics'']\\)\\); print\\(''Константы:'', len\\(data.get\\(''constants'', {}\\)\\)\\)\")",
+      "Bash(dir /s /b \"d:\\\\ClaudeCode\\\\Physics\\\\frontend\")",
+      "Bash(npm install)",
+      "Bash(powershell -Command \"cd ''d:\\\\ClaudeCode\\\\Physics\\\\frontend''; npm install\")",
+      "Skill(claude-developer-platform)",
+      "Skill(claude-developer-platform:*)"
+    ]
+  }
+}

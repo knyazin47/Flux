@@ -1,0 +1,281 @@
+import { useState } from "react";
+import Card from "@/components/ui/Card";
+import TopicBadge from "@/components/ui/TopicBadge";
+import OrangeButton from "@/components/ui/OrangeButton";
+import ProgressBar from "@/components/ui/ProgressBar";
+import { ArrowLeft, ChevronDown, Star, Check, X } from "lucide-react";
+import { createPageUrl } from "@/utils";
+import katex from "katex";
+import "katex/dist/katex.min.css";
+import { generateQuestions } from "@/utils/generateQuestions";
+import { updateTopicStats, checkAchievements } from "@/utils/storage";
+
+function TeX({ formula }) {
+  const html = katex.renderToString(formula, { throwOnError: false, displayMode: true });
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+const TOPICS_LIST = [
+  "Все темы",
+  "Механика",
+  "Молекулярная физика",
+  "Термодинамика",
+  "Электростатика",
+  "Постоянный ток",
+  "Электромагнетизм",
+  "Колебания и волны",
+  "Оптика",
+  "Квантовая и ядерная физика",
+];
+
+const LABELS = ["А", "Б", "В", "Г", "Д"];
+const SESSION_COUNT = 15;
+
+export default function Theory() {
+  const [selectedTopic, setSelectedTopic] = useState("Все темы");
+  const [topicOpen,     setTopicOpen]     = useState(false);
+  const [mode,          setMode]          = useState("topic");
+  const [view,          setView]          = useState("start"); // start | loading | question | finished
+  const [qIndex,        setQIndex]        = useState(0);
+  const [selected,      setSelected]      = useState(null);
+  const [score,         setScore]         = useState({ correct: 0, wrong: 0 });
+  const [sessionQ,      setSessionQ]      = useState([]);
+  const [answers,       setAnswers]       = useState([]);
+  const [loadError,     setLoadError]     = useState(null);
+
+  const start = async () => {
+    setView("loading");
+    setLoadError(null);
+    try {
+      const topic = selectedTopic === "Все темы"
+        ? TOPICS_LIST[Math.floor(Math.random() * (TOPICS_LIST.length - 1)) + 1]
+        : selectedTopic;
+      const qs = await generateQuestions(topic, SESSION_COUNT, 1);
+      if (qs.length === 0) throw new Error("Нет вопросов");
+      const pool = mode === "random" ? [...qs].sort(() => Math.random() - 0.5) : qs;
+      setSessionQ(pool);
+      setQIndex(0);
+      setSelected(null);
+      setScore({ correct: 0, wrong: 0 });
+      setAnswers([]);
+      setView("question");
+    } catch {
+      setLoadError("Не удалось загрузить вопросы. Проверь интернет-соединение.");
+      setView("start");
+    }
+  };
+
+  const handleSelect = (idx) => {
+    if (selected !== null) return;
+    const q = sessionQ[qIndex];
+    const correct = idx === q.correct;
+    setSelected(idx);
+    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
+    setAnswers((prev) => [...prev, { correct, topic: q.topic }]);
+  };
+
+  const next = () => {
+    if (qIndex + 1 >= sessionQ.length) {
+      // Сохраняем статистику
+      const byTopic = {};
+      answers.concat([{ correct: selected === sessionQ[qIndex].correct, topic: sessionQ[qIndex].topic }])
+        .forEach(({ topic, correct }) => {
+          if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
+          byTopic[topic].total += 1;
+          if (correct) byTopic[topic].correct += 1;
+        });
+      Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
+        updateTopicStats(topic, correct, total);
+      });
+      checkAchievements();
+      setView("finished");
+      return;
+    }
+    setQIndex((i) => i + 1);
+    setSelected(null);
+  };
+
+  const weakTopics = sessionQ.reduce((acc, q, i) => {
+    if (!answers[i]?.correct) acc[q.topic] = (acc[q.topic] || 0) + 1;
+    return acc;
+  }, {});
+  const pct = sessionQ.length > 0 ? Math.round((score.correct / sessionQ.length) * 100) : 0;
+  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  const motivation = pct >= 80 ? "Отличная работа! 🎉" : pct >= 60 ? "Хороший результат! 💪" : "Продолжай стараться! 📚";
+
+  // ── Загрузка ──────────────────────────────────────────────────────────────
+  if (view === "loading") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 p-8 min-h-[60vh]">
+        <div className="w-14 h-14 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
+        <p className="text-sm font-semibold text-center" style={{ color: "var(--muted)" }}>
+          ИИ генерирует вопросы…
+        </p>
+      </div>
+    );
+  }
+
+  // ── Результаты ─────────────────────────────────────────────────────────────
+  if (view === "finished") return (
+    <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col items-center gap-2 pt-4 pb-2">
+        <p className="text-4xl font-bold" style={{ color: "var(--text)" }}>{score.correct} / {sessionQ.length}</p>
+        <div className="flex gap-1">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Star key={i} size={26} fill={i < stars ? "#F97316" : "none"} stroke="#F97316" strokeWidth={1.5} />
+          ))}
+        </div>
+        <p className="text-base font-semibold" style={{ color: "var(--text)" }}>{motivation}</p>
+      </div>
+      {Object.keys(weakTopics).length > 0 && (
+        <Card>
+          <p className="text-sm font-semibold mb-3" style={{ color: "var(--text)" }}>Слабые места:</p>
+          {Object.entries(weakTopics).map(([t, n]) => (
+            <div key={t} className="flex justify-between text-sm py-1" style={{ color: "var(--muted)" }}>
+              <span>{t}</span>
+              <span className="text-red-400">{n} ошибок</span>
+            </div>
+          ))}
+        </Card>
+      )}
+      <div className="flex flex-col gap-3">
+        <OrangeButton onClick={() => setView("start")}>Назад</OrangeButton>
+        <button onClick={start} className="w-full py-3 rounded-2xl text-sm font-semibold border-2"
+          style={{ borderColor: "#F97316", color: "#F97316", background: "var(--card)" }}>
+          Ещё раз
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── Вопрос ─────────────────────────────────────────────────────────────────
+  if (view === "question") {
+    const q = sessionQ[qIndex];
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex items-center justify-between pt-2">
+          <button onClick={() => setView("start")}
+            className="w-9 h-9 flex items-center justify-center rounded-xl"
+            style={{ background: "var(--card)", color: "var(--text)" }}>
+            <ArrowLeft size={18} />
+          </button>
+          <span className="text-xs font-bold px-3 py-1.5 rounded-full"
+            style={{ background: "var(--card)", color: "var(--text)" }}>
+            ✓ {score.correct} | ✗ {score.wrong}
+          </span>
+        </div>
+        <div>
+          <ProgressBar value={qIndex + 1} max={sessionQ.length} />
+          <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>Вопрос {qIndex + 1} / {sessionQ.length}</p>
+        </div>
+        <TopicBadge label={q.topic} />
+        <Card>
+          <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
+          {q.formula && (
+            <div className="mt-3 py-3 px-4 rounded-xl text-center overflow-x-auto" style={{ background: "var(--bg)" }}>
+              <TeX formula={q.formula} />
+            </div>
+          )}
+        </Card>
+        <div className="flex flex-col gap-2">
+          {q.options.map((opt, idx) => {
+            let bg = "var(--card)", border = "var(--border)", color = "var(--text)", icon = null;
+            if (selected !== null) {
+              if (idx === q.correct)     { bg = "#F0FDF4"; border = "#22C55E"; color = "#15803D"; icon = "check"; }
+              else if (idx === selected) { bg = "#FEF2F2"; border = "#EF4444"; color = "#B91C1C"; icon = "wrong"; }
+            }
+            return (
+              <button key={idx} onClick={() => handleSelect(idx)}
+                className="w-full h-14 flex items-center justify-between px-4 rounded-2xl text-left text-base transition-all duration-200"
+                style={{ background: bg, border: `1.5px solid ${border}`, color }}>
+                <span><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt}</span>
+                {icon === "check" && (
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
+                    <Check size={14} color="white" strokeWidth={2.5} />
+                  </span>
+                )}
+                {icon === "wrong" && (
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EF4444" }}>
+                    <X size={14} color="white" strokeWidth={2.5} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {selected !== null && (
+          <div className="flex flex-col gap-3">
+            {q.explanation && (
+              <Card style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>💡 {q.explanation}</p>
+                <button onClick={() => window.location.href = createPageUrl("Cheatsheet")}
+                  className="mt-2 text-xs font-semibold" style={{ color: "#F97316" }}>
+                  → Открыть шпаргалку
+                </button>
+              </Card>
+            )}
+            <OrangeButton onClick={next}>
+              {qIndex + 1 >= sessionQ.length ? "Завершить →" : "Следующий →"}
+            </OrangeButton>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Стартовый экран ────────────────────────────────────────────────────────
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Теория</h1>
+
+      {loadError && (
+        <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: "#FEF2F2", color: "#B91C1C" }}>
+          {loadError}
+        </div>
+      )}
+
+      {/* Выбор темы */}
+      <div className="relative">
+        <button onClick={() => setTopicOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium"
+          style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--text)" }}>
+          {selectedTopic}
+          <ChevronDown size={16} style={{ color: "var(--muted)" }} />
+        </button>
+        {topicOpen && (
+          <div className="absolute top-full left-0 right-0 mt-1 rounded-2xl overflow-hidden z-20 shadow-xl"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+            {TOPICS_LIST.map((t) => (
+              <button key={t} onClick={() => { setSelectedTopic(t); setTopicOpen(false); }}
+                className="w-full text-left px-4 py-3 text-sm border-b last:border-0 transition-colors"
+                style={{
+                  borderColor: "var(--border)",
+                  color: t === selectedTopic ? "#F97316" : "var(--text)",
+                  background: t === selectedTopic ? "#FFF7ED" : "var(--card)",
+                }}>
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Режим */}
+      <div className="flex gap-2">
+        {[{ id: "topic", label: "📚 По теме" }, { id: "random", label: "🎲 Случайные" }].map((m) => (
+          <button key={m.id} onClick={() => setMode(m.id)}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+            style={{
+              background: mode === m.id ? "#F97316" : "var(--card)",
+              color: mode === m.id ? "#fff" : "var(--muted)",
+              border: `1px solid ${mode === m.id ? "#F97316" : "var(--border)"}`,
+            }}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      <OrangeButton onClick={start}>Начать →</OrangeButton>
+    </div>
+  );
+}

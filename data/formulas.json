@@ -1,0 +1,1655 @@
+{
+  "version": "1.0",
+  "description": "База формул по физике для ЦТ/ЦЭ Беларусь 2026",
+  "topics": [
+    {
+      "id": "mechanics",
+      "name": "Механика",
+      "subtopics": ["Кинематика", "Динамика", "Законы сохранения", "Статика", "Гидростатика"],
+      "formulas": [
+        {
+          "id": "mech_k01",
+          "name": "Уравнение равномерного движения",
+          "formula": "x = x₀ + v·t",
+          "latex": "x = x_0 + v \\cdot t",
+          "units": "м",
+          "subtopic": "Кинематика",
+          "variables": {
+            "x": "координата в момент t [м]",
+            "x₀": "начальная координата [м]",
+            "v": "скорость [м/с]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k02",
+          "name": "Средняя скорость пути",
+          "formula": "v_ср = s / t",
+          "latex": "v_{\\text{ср}} = \\frac{s}{t}",
+          "units": "м/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "s": "пройденный путь [м]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k03",
+          "name": "Ускорение",
+          "formula": "a = (v - v₀) / t",
+          "latex": "a = \\frac{v - v_0}{t}",
+          "units": "м/с²",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v": "конечная скорость [м/с]",
+            "v₀": "начальная скорость [м/с]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k04",
+          "name": "Скорость при равноускоренном движении",
+          "formula": "v = v₀ + a·t",
+          "latex": "v = v_0 + a \\cdot t",
+          "units": "м/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v₀": "начальная скорость [м/с]",
+            "a": "ускорение [м/с²]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k05",
+          "name": "Перемещение при равноускоренном движении",
+          "formula": "s = v₀·t + a·t² / 2",
+          "latex": "s = v_0 t + \\frac{a t^2}{2}",
+          "units": "м",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v₀": "начальная скорость [м/с]",
+            "a": "ускорение [м/с²]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k06",
+          "name": "Перемещение без времени",
+          "formula": "s = (v² - v₀²) / (2a)",
+          "latex": "s = \\frac{v^2 - v_0^2}{2a}",
+          "units": "м",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v": "конечная скорость [м/с]",
+            "v₀": "начальная скорость [м/с]",
+            "a": "ускорение [м/с²]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_k07",
+          "name": "Средняя скорость при равноускоренном движении",
+          "formula": "v_ср = (v + v₀) / 2",
+          "latex": "v_{\\text{ср}} = \\frac{v + v_0}{2}",
+          "units": "м/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v": "конечная скорость [м/с]",
+            "v₀": "начальная скорость [м/с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k08",
+          "name": "Скорость при падении с высоты h",
+          "formula": "v = √(2gh)",
+          "latex": "v = \\sqrt{2gh}",
+          "units": "м/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "g": "ускорение свободного падения = 10 м/с²",
+            "h": "высота [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k09",
+          "name": "Время свободного падения",
+          "formula": "t = √(2h / g)",
+          "latex": "t = \\sqrt{\\frac{2h}{g}}",
+          "units": "с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "h": "высота [м]",
+            "g": "ускорение свободного падения = 10 м/с²"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k10",
+          "name": "Максимальная высота подъёма",
+          "formula": "h_max = v₀² / (2g)",
+          "latex": "h_{\\max} = \\frac{v_0^2}{2g}",
+          "units": "м",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v₀": "начальная скорость [м/с]",
+            "g": "ускорение свободного падения = 10 м/с²"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k11",
+          "name": "Угловая скорость",
+          "formula": "ω = Δφ / Δt = 2πν = 2π / T",
+          "latex": "\\omega = \\frac{\\Delta \\varphi}{\\Delta t} = 2\\pi\\nu = \\frac{2\\pi}{T}",
+          "units": "рад/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "Δφ": "изменение угла [рад]",
+            "T": "период [с]",
+            "ν": "частота [Гц]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_k12",
+          "name": "Линейная скорость при вращении",
+          "formula": "v = ω·R = 2πR / T",
+          "latex": "v = \\omega R = \\frac{2\\pi R}{T}",
+          "units": "м/с",
+          "subtopic": "Кинематика",
+          "variables": {
+            "ω": "угловая скорость [рад/с]",
+            "R": "радиус [м]",
+            "T": "период [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_k13",
+          "name": "Центростремительное ускорение",
+          "formula": "a_ц = v² / R = ω²·R",
+          "latex": "a_\\text{ц} = \\frac{v^2}{R} = \\omega^2 R",
+          "units": "м/с²",
+          "subtopic": "Кинематика",
+          "variables": {
+            "v": "линейная скорость [м/с]",
+            "R": "радиус [м]",
+            "ω": "угловая скорость [рад/с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_d01",
+          "name": "Второй закон Ньютона",
+          "formula": "F = m·a",
+          "latex": "\\vec{F} = m\\vec{a}",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "F": "равнодействующая сила [Н]",
+            "m": "масса [кг]",
+            "a": "ускорение [м/с²]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_d02",
+          "name": "Сила тяжести",
+          "formula": "F = m·g",
+          "latex": "F = mg",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "m": "масса [кг]",
+            "g": "ускорение свободного падения = 10 м/с²"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_d03",
+          "name": "Сила трения скольжения",
+          "formula": "F_тр = μ·N",
+          "latex": "F_{\\text{тр}} = \\mu N",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "μ": "коэффициент трения скольжения",
+            "N": "сила нормальной реакции опоры [Н]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_d04",
+          "name": "Закон Гука",
+          "formula": "F_упр = k·|Δl|",
+          "latex": "F_{\\text{упр}} = k |\\Delta l|",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "k": "жёсткость пружины [Н/м]",
+            "Δl": "деформация (удлинение) [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_d05",
+          "name": "Закон всемирного тяготения",
+          "formula": "F = G·m₁·m₂ / r²",
+          "latex": "F = G\\frac{m_1 m_2}{r^2}",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "G": "гравитационная постоянная = 6.67·10⁻¹¹ Н·м²/кг²",
+            "m₁, m₂": "массы тел [кг]",
+            "r": "расстояние между телами [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_d06",
+          "name": "Вес тела в лифте (движение вверх)",
+          "formula": "P = m·(g + a)",
+          "latex": "P = m(g + a)",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "m": "масса [кг]",
+            "g": "ускорение свободного падения = 10 м/с²",
+            "a": "ускорение лифта [м/с²]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_d07",
+          "name": "Вес тела в лифте (движение вниз)",
+          "formula": "P = m·|g - a|",
+          "latex": "P = m|g - a|",
+          "units": "Н",
+          "subtopic": "Динамика",
+          "variables": {
+            "m": "масса [кг]",
+            "g": "ускорение свободного падения = 10 м/с²",
+            "a": "ускорение лифта [м/с²]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_e01",
+          "name": "Кинетическая энергия",
+          "formula": "Eк = m·v² / 2",
+          "latex": "E_k = \\frac{mv^2}{2}",
+          "units": "Дж",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "m": "масса [кг]",
+            "v": "скорость [м/с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e02",
+          "name": "Потенциальная энергия (тело над землёй)",
+          "formula": "Eп = m·g·h",
+          "latex": "E_p = mgh",
+          "units": "Дж",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "m": "масса [кг]",
+            "g": "ускорение свободного падения = 10 м/с²",
+            "h": "высота над нулевым уровнем [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e03",
+          "name": "Потенциальная энергия деформированной пружины",
+          "formula": "Eп = k·x² / 2",
+          "latex": "E_p = \\frac{kx^2}{2}",
+          "units": "Дж",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "k": "жёсткость [Н/м]",
+            "x": "деформация [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_e04",
+          "name": "Работа силы",
+          "formula": "A = F·s·cos α",
+          "latex": "A = F s \\cos\\alpha",
+          "units": "Дж",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "F": "сила [Н]",
+            "s": "перемещение [м]",
+            "α": "угол между силой и перемещением"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e05",
+          "name": "Мощность",
+          "formula": "P = A / t = F·v·cos α",
+          "latex": "P = \\frac{A}{t} = Fv\\cos\\alpha",
+          "units": "Вт",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "A": "работа [Дж]",
+            "t": "время [с]",
+            "F": "сила [Н]",
+            "v": "скорость [м/с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e06",
+          "name": "КПД механизма",
+          "formula": "η = A_пол / A_затр",
+          "latex": "\\eta = \\frac{A_{\\text{пол}}}{A_{\\text{затр}}}",
+          "units": "%",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "A_пол": "полезная работа [Дж]",
+            "A_затр": "затраченная работа [Дж]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e07",
+          "name": "Импульс тела",
+          "formula": "p = m·v",
+          "latex": "\\vec{p} = m\\vec{v}",
+          "units": "кг·м/с",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "m": "масса [кг]",
+            "v": "скорость [м/с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_e08",
+          "name": "Второй закон Ньютона (через импульс)",
+          "formula": "F = Δp / Δt",
+          "latex": "\\vec{F} = \\frac{\\Delta\\vec{p}}{\\Delta t}",
+          "units": "Н",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "Δp": "изменение импульса [кг·м/с]",
+            "Δt": "время действия силы [с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_e09",
+          "name": "Закон сохранения импульса",
+          "formula": "m₁·v₁ + m₂·v₂ = m₁·v₁' + m₂·v₂'",
+          "latex": "m_1 v_1 + m_2 v_2 = m_1 v_1' + m_2 v_2'",
+          "units": "кг·м/с",
+          "subtopic": "Законы сохранения",
+          "variables": {
+            "m₁, m₂": "массы тел [кг]",
+            "v₁, v₂": "скорости до взаимодействия [м/с]",
+            "v₁', v₂'": "скорости после взаимодействия [м/с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mech_h01",
+          "name": "Сила Архимеда",
+          "formula": "F_A = ρ_ж·g·V_погр",
+          "latex": "F_A = \\rho_\\text{ж} g V_{\\text{погр}}",
+          "units": "Н",
+          "subtopic": "Гидростатика",
+          "variables": {
+            "ρ_ж": "плотность жидкости [кг/м³]",
+            "g": "ускорение свободного падения = 10 м/с²",
+            "V_погр": "объём погружённой части тела [м³]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_h02",
+          "name": "Давление",
+          "formula": "p = F / S",
+          "latex": "p = \\frac{F}{S}",
+          "units": "Па",
+          "subtopic": "Гидростатика",
+          "variables": {
+            "F": "сила [Н]",
+            "S": "площадь [м²]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mech_h03",
+          "name": "Гидростатическое давление столба жидкости",
+          "formula": "p = ρ·g·h",
+          "latex": "p = \\rho g h",
+          "units": "Па",
+          "subtopic": "Гидростатика",
+          "variables": {
+            "ρ": "плотность жидкости [кг/м³]",
+            "g": "ускорение свободного падения = 10 м/с²",
+            "h": "глубина [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "molecular",
+      "name": "Молекулярная физика",
+      "subtopics": ["МКТ", "Газовые законы"],
+      "formulas": [
+        {
+          "id": "mol_01",
+          "name": "Количество вещества (через число молекул)",
+          "formula": "ν = N / N_A",
+          "latex": "\\nu = \\frac{N}{N_A}",
+          "units": "моль",
+          "subtopic": "МКТ",
+          "variables": {
+            "N": "число молекул",
+            "N_A": "число Авогадро = 6.022·10²³ моль⁻¹"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_02",
+          "name": "Количество вещества (через массу)",
+          "formula": "ν = m / M",
+          "latex": "\\nu = \\frac{m}{M}",
+          "units": "моль",
+          "subtopic": "МКТ",
+          "variables": {
+            "m": "масса газа [кг]",
+            "M": "молярная масса [кг/моль]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_03",
+          "name": "Основное уравнение МКТ",
+          "formula": "p = (1/3)·n·m₀·v²_кв",
+          "latex": "p = \\frac{1}{3} n m_0 v_{\\text{кв}}^2",
+          "units": "Па",
+          "subtopic": "МКТ",
+          "variables": {
+            "n": "концентрация молекул [м⁻³]",
+            "m₀": "масса одной молекулы [кг]",
+            "v_кв": "средняя квадратичная скорость [м/с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mol_04",
+          "name": "Средняя кинетическая энергия молекул",
+          "formula": "<K> = (3/2)·k·T",
+          "latex": "\\langle K \\rangle = \\frac{3}{2} kT",
+          "units": "Дж",
+          "subtopic": "МКТ",
+          "variables": {
+            "k": "постоянная Больцмана = 1.38·10⁻²³ Дж/К",
+            "T": "абсолютная температура [К]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mol_05",
+          "name": "Средняя квадратичная скорость молекул",
+          "formula": "v_кв = √(3kT / m₀) = √(3RT / M)",
+          "latex": "v_{\\text{кв}} = \\sqrt{\\frac{3kT}{m_0}} = \\sqrt{\\frac{3RT}{M}}",
+          "units": "м/с",
+          "subtopic": "МКТ",
+          "variables": {
+            "k": "постоянная Больцмана = 1.38·10⁻²³ Дж/К",
+            "T": "абсолютная температура [К]",
+            "m₀": "масса молекулы [кг]",
+            "R": "универсальная газовая постоянная = 8.31 Дж/(моль·К)",
+            "M": "молярная масса [кг/моль]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mol_06",
+          "name": "Уравнение Клапейрона-Менделеева",
+          "formula": "p·V = ν·R·T",
+          "latex": "pV = \\nu RT",
+          "units": "Па·м³",
+          "subtopic": "Газовые законы",
+          "variables": {
+            "p": "давление [Па]",
+            "V": "объём [м³]",
+            "ν": "количество вещества [моль]",
+            "R": "универсальная газовая постоянная = 8.31 Дж/(моль·К)",
+            "T": "абсолютная температура [К]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mol_07",
+          "name": "Уравнение состояния идеального газа (Клапейрон)",
+          "formula": "p₁·V₁ / T₁ = p₂·V₂ / T₂",
+          "latex": "\\frac{p_1 V_1}{T_1} = \\frac{p_2 V_2}{T_2}",
+          "units": "—",
+          "subtopic": "Газовые законы",
+          "variables": {
+            "p₁, p₂": "давления [Па]",
+            "V₁, V₂": "объёмы [м³]",
+            "T₁, T₂": "абсолютные температуры [К]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_08",
+          "name": "Закон Бойля-Мариотта (изотермический процесс)",
+          "formula": "p·V = const  (при T = const)",
+          "latex": "pV = \\text{const} \\quad (T = \\text{const})",
+          "units": "—",
+          "subtopic": "Газовые законы",
+          "variables": {
+            "p": "давление [Па]",
+            "V": "объём [м³]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_09",
+          "name": "Закон Гей-Люссака (изобарный процесс)",
+          "formula": "V / T = const  (при p = const)",
+          "latex": "\\frac{V}{T} = \\text{const} \\quad (p = \\text{const})",
+          "units": "—",
+          "subtopic": "Газовые законы",
+          "variables": {
+            "V": "объём [м³]",
+            "T": "абсолютная температура [К]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_10",
+          "name": "Закон Шарля (изохорный процесс)",
+          "formula": "p / T = const  (при V = const)",
+          "latex": "\\frac{p}{T} = \\text{const} \\quad (V = \\text{const})",
+          "units": "—",
+          "subtopic": "Газовые законы",
+          "variables": {
+            "p": "давление [Па]",
+            "T": "абсолютная температура [К]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "mol_11",
+          "name": "Плотность идеального газа",
+          "formula": "ρ = p·M / (R·T)",
+          "latex": "\\rho = \\frac{pM}{RT}",
+          "units": "кг/м³",
+          "subtopic": "МКТ",
+          "variables": {
+            "p": "давление [Па]",
+            "M": "молярная масса [кг/моль]",
+            "R": "8.31 Дж/(моль·К)",
+            "T": "температура [К]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "mol_12",
+          "name": "Перевод температур",
+          "formula": "T = t + 273  [К]",
+          "latex": "T = t + 273 \\text{ К}",
+          "units": "К",
+          "subtopic": "МКТ",
+          "variables": {
+            "T": "абсолютная температура [К]",
+            "t": "температура по Цельсию [°C]"
+          },
+          "difficulty": 1,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "thermodynamics",
+      "name": "Термодинамика",
+      "subtopics": ["Теплообмен", "Термодинамические процессы", "Тепловые машины"],
+      "formulas": [
+        {
+          "id": "therm_01",
+          "name": "Количество теплоты при нагревании",
+          "formula": "Q = c·m·Δt",
+          "latex": "Q = cm\\Delta t",
+          "units": "Дж",
+          "subtopic": "Теплообмен",
+          "variables": {
+            "c": "удельная теплоёмкость [Дж/(кг·К)]",
+            "m": "масса [кг]",
+            "Δt": "изменение температуры [°C или К]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "therm_02",
+          "name": "Теплота парообразования/конденсации",
+          "formula": "Q = r·m",
+          "latex": "Q = rm",
+          "units": "Дж",
+          "subtopic": "Теплообмен",
+          "variables": {
+            "r": "удельная теплота парообразования [Дж/кг]",
+            "m": "масса [кг]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "therm_03",
+          "name": "Теплота плавления/кристаллизации",
+          "formula": "Q = λ·m",
+          "latex": "Q = \\lambda m",
+          "units": "Дж",
+          "subtopic": "Теплообмен",
+          "variables": {
+            "λ": "удельная теплота плавления [Дж/кг]",
+            "m": "масса [кг]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "therm_04",
+          "name": "Теплота сгорания топлива",
+          "formula": "Q = q·m",
+          "latex": "Q = qm",
+          "units": "Дж",
+          "subtopic": "Теплообмен",
+          "variables": {
+            "q": "удельная теплота сгорания [Дж/кг]",
+            "m": "масса [кг]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "therm_05",
+          "name": "Первый закон термодинамики",
+          "formula": "Q = ΔU + A",
+          "latex": "Q = \\Delta U + A",
+          "units": "Дж",
+          "subtopic": "Термодинамические процессы",
+          "variables": {
+            "Q": "теплота, полученная системой [Дж]",
+            "ΔU": "изменение внутренней энергии [Дж]",
+            "A": "работа газа [Дж]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "therm_06",
+          "name": "Внутренняя энергия идеального газа",
+          "formula": "U = (3/2)·ν·R·T",
+          "latex": "U = \\frac{3}{2}\\nu RT",
+          "units": "Дж",
+          "subtopic": "Термодинамические процессы",
+          "variables": {
+            "ν": "количество вещества [моль]",
+            "R": "8.31 Дж/(моль·К)",
+            "T": "температура [К]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "therm_07",
+          "name": "Работа газа при изобарном процессе",
+          "formula": "A = p·ΔV",
+          "latex": "A = p\\Delta V",
+          "units": "Дж",
+          "subtopic": "Термодинамические процессы",
+          "variables": {
+            "p": "давление [Па]",
+            "ΔV": "изменение объёма [м³]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "therm_08",
+          "name": "КПД теплового двигателя",
+          "formula": "η = A / Q₁ = 1 - |Q₂| / Q₁",
+          "latex": "\\eta = \\frac{A}{Q_1} = 1 - \\frac{|Q_2|}{Q_1}",
+          "units": "%",
+          "subtopic": "Тепловые машины",
+          "variables": {
+            "A": "работа двигателя за цикл [Дж]",
+            "Q₁": "теплота от нагревателя [Дж]",
+            "Q₂": "теплота, отданная холодильнику [Дж]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "therm_09",
+          "name": "КПД цикла Карно (максимальный)",
+          "formula": "η_max = 1 - T₂ / T₁",
+          "latex": "\\eta_{\\max} = 1 - \\frac{T_2}{T_1}",
+          "units": "%",
+          "subtopic": "Тепловые машины",
+          "variables": {
+            "T₁": "температура нагревателя [К]",
+            "T₂": "температура холодильника [К]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "therm_10",
+          "name": "Уравнение теплового баланса",
+          "formula": "Q₁ + Q₂ + ... = 0",
+          "latex": "Q_1 + Q_2 + \\ldots = 0",
+          "units": "Дж",
+          "subtopic": "Теплообмен",
+          "notes": "Отдающие тела: Q < 0, получающие: Q > 0",
+          "difficulty": 1,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "electrostatics",
+      "name": "Электростатика",
+      "subtopics": ["Закон Кулона", "Электрическое поле", "Конденсаторы"],
+      "formulas": [
+        {
+          "id": "es_01",
+          "name": "Закон Кулона",
+          "formula": "F = k·|q₁|·|q₂| / (ε·r²)",
+          "latex": "F = k\\frac{|q_1||q_2|}{\\varepsilon r^2}",
+          "units": "Н",
+          "subtopic": "Закон Кулона",
+          "variables": {
+            "k": "= 9·10⁹ Н·м²/Кл²",
+            "q₁, q₂": "заряды [Кл]",
+            "ε": "диэлектрическая проницаемость среды",
+            "r": "расстояние между зарядами [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "es_02",
+          "name": "Напряжённость электрического поля",
+          "formula": "E = F / q = k·|Q| / (ε·r²)",
+          "latex": "E = \\frac{F}{q} = \\frac{k|Q|}{\\varepsilon r^2}",
+          "units": "Н/Кл = В/м",
+          "subtopic": "Электрическое поле",
+          "variables": {
+            "F": "сила, действующая на пробный заряд [Н]",
+            "q": "пробный заряд [Кл]",
+            "k": "= 9·10⁹ Н·м²/Кл²",
+            "Q": "заряд, создающий поле [Кл]",
+            "r": "расстояние от заряда [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "es_03",
+          "name": "Потенциал точечного заряда",
+          "formula": "φ = k·Q / (ε·r)",
+          "latex": "\\varphi = \\frac{kQ}{\\varepsilon r}",
+          "units": "В",
+          "subtopic": "Электрическое поле",
+          "variables": {
+            "k": "= 9·10⁹ Н·м²/Кл²",
+            "Q": "заряд [Кл]",
+            "ε": "диэлектрическая проницаемость",
+            "r": "расстояние [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "es_04",
+          "name": "Напряжение (разность потенциалов)",
+          "formula": "U = φ₁ - φ₂ = E·d",
+          "latex": "U = \\varphi_1 - \\varphi_2 = Ed",
+          "units": "В",
+          "subtopic": "Электрическое поле",
+          "variables": {
+            "φ₁, φ₂": "потенциалы точек [В]",
+            "E": "напряжённость однородного поля [В/м]",
+            "d": "расстояние между точками вдоль поля [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "es_05",
+          "name": "Работа электрического поля",
+          "formula": "A = q·U = q·(φ₁ - φ₂)",
+          "latex": "A = qU = q(\\varphi_1 - \\varphi_2)",
+          "units": "Дж",
+          "subtopic": "Электрическое поле",
+          "variables": {
+            "q": "заряд [Кл]",
+            "U": "напряжение [В]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "es_06",
+          "name": "Электроёмкость конденсатора",
+          "formula": "C = q / U",
+          "latex": "C = \\frac{q}{U}",
+          "units": "Ф",
+          "subtopic": "Конденсаторы",
+          "variables": {
+            "q": "заряд на обкладке [Кл]",
+            "U": "напряжение на конденсаторе [В]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "es_07",
+          "name": "Ёмкость плоского конденсатора",
+          "formula": "C = ε·ε₀·S / d",
+          "latex": "C = \\frac{\\varepsilon \\varepsilon_0 S}{d}",
+          "units": "Ф",
+          "subtopic": "Конденсаторы",
+          "variables": {
+            "ε": "диэлектрическая проницаемость",
+            "ε₀": "электрическая постоянная = 8.85·10⁻¹² Ф/м",
+            "S": "площадь обкладки [м²]",
+            "d": "расстояние между обкладками [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "es_08",
+          "name": "Энергия заряженного конденсатора",
+          "formula": "W = q²/(2C) = C·U²/2 = q·U/2",
+          "latex": "W = \\frac{q^2}{2C} = \\frac{CU^2}{2} = \\frac{qU}{2}",
+          "units": "Дж",
+          "subtopic": "Конденсаторы",
+          "variables": {
+            "q": "заряд [Кл]",
+            "C": "ёмкость [Ф]",
+            "U": "напряжение [В]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "es_09",
+          "name": "Последовательное соединение конденсаторов",
+          "formula": "1/C = 1/C₁ + 1/C₂ + ...",
+          "latex": "\\frac{1}{C} = \\frac{1}{C_1} + \\frac{1}{C_2} + \\ldots",
+          "units": "Ф",
+          "subtopic": "Конденсаторы",
+          "notes": "Заряды одинаковы: q = q₁ = q₂",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "es_10",
+          "name": "Параллельное соединение конденсаторов",
+          "formula": "C = C₁ + C₂ + ...",
+          "latex": "C = C_1 + C_2 + \\ldots",
+          "units": "Ф",
+          "subtopic": "Конденсаторы",
+          "notes": "Напряжения одинаковы: U = U₁ = U₂",
+          "difficulty": 2,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "electric_current",
+      "name": "Постоянный ток",
+      "subtopics": ["Основные законы", "Соединение проводников", "Работа и мощность"],
+      "formulas": [
+        {
+          "id": "cur_01",
+          "name": "Сила тока",
+          "formula": "I = q / t",
+          "latex": "I = \\frac{q}{t}",
+          "units": "А",
+          "subtopic": "Основные законы",
+          "variables": {
+            "q": "заряд [Кл]",
+            "t": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_02",
+          "name": "Закон Ома для участка цепи",
+          "formula": "I = U / R",
+          "latex": "I = \\frac{U}{R}",
+          "units": "А",
+          "subtopic": "Основные законы",
+          "variables": {
+            "U": "напряжение [В]",
+            "R": "сопротивление [Ом]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_03",
+          "name": "Сопротивление проводника",
+          "formula": "R = ρ·l / S",
+          "latex": "R = \\rho\\frac{l}{S}",
+          "units": "Ом",
+          "subtopic": "Основные законы",
+          "variables": {
+            "ρ": "удельное сопротивление [Ом·м]",
+            "l": "длина проводника [м]",
+            "S": "площадь поперечного сечения [м²]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_04",
+          "name": "Зависимость сопротивления от температуры",
+          "formula": "R = R₀·(1 + α·t)",
+          "latex": "R = R_0(1 + \\alpha t)",
+          "units": "Ом",
+          "subtopic": "Основные законы",
+          "variables": {
+            "R₀": "сопротивление при 0°C [Ом]",
+            "α": "температурный коэффициент [1/°C]",
+            "t": "температура [°C]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "cur_05",
+          "name": "Последовательное соединение (сопротивление)",
+          "formula": "R = R₁ + R₂ + ...",
+          "latex": "R = R_1 + R_2 + \\ldots",
+          "units": "Ом",
+          "subtopic": "Соединение проводников",
+          "notes": "Ток одинаков: I = I₁ = I₂",
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_06",
+          "name": "Параллельное соединение (сопротивление)",
+          "formula": "1/R = 1/R₁ + 1/R₂  →  R = R₁·R₂/(R₁+R₂)",
+          "latex": "\\frac{1}{R} = \\frac{1}{R_1} + \\frac{1}{R_2} \\Rightarrow R = \\frac{R_1 R_2}{R_1 + R_2}",
+          "units": "Ом",
+          "subtopic": "Соединение проводников",
+          "notes": "Напряжение одинаково: U = U₁ = U₂",
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_07",
+          "name": "Закон Ома для полной цепи",
+          "formula": "I = ε / (R + r)",
+          "latex": "I = \\frac{\\varepsilon}{R + r}",
+          "units": "А",
+          "subtopic": "Основные законы",
+          "variables": {
+            "ε": "ЭДС источника [В]",
+            "R": "внешнее сопротивление [Ом]",
+            "r": "внутреннее сопротивление [Ом]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "cur_08",
+          "name": "Работа электрического тока",
+          "formula": "A = I·U·Δt = I²·R·Δt = U²·Δt / R",
+          "latex": "A = IU\\Delta t = I^2 R \\Delta t = \\frac{U^2 \\Delta t}{R}",
+          "units": "Дж",
+          "subtopic": "Работа и мощность",
+          "variables": {
+            "I": "сила тока [А]",
+            "U": "напряжение [В]",
+            "R": "сопротивление [Ом]",
+            "Δt": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_09",
+          "name": "Мощность электрического тока",
+          "formula": "P = I·U = I²·R = U² / R",
+          "latex": "P = IU = I^2 R = \\frac{U^2}{R}",
+          "units": "Вт",
+          "subtopic": "Работа и мощность",
+          "variables": {
+            "I": "сила тока [А]",
+            "U": "напряжение [В]",
+            "R": "сопротивление [Ом]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_10",
+          "name": "Закон Джоуля-Ленца",
+          "formula": "Q = I²·R·Δt",
+          "latex": "Q = I^2 R \\Delta t",
+          "units": "Дж",
+          "subtopic": "Работа и мощность",
+          "variables": {
+            "I": "сила тока [А]",
+            "R": "сопротивление [Ом]",
+            "Δt": "время [с]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "cur_11",
+          "name": "КПД источника тока",
+          "formula": "η = R / (R + r)",
+          "latex": "\\eta = \\frac{R}{R + r}",
+          "units": "%",
+          "subtopic": "Основные законы",
+          "variables": {
+            "R": "внешнее сопротивление [Ом]",
+            "r": "внутреннее сопротивление [Ом]"
+          },
+          "difficulty": 2,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "electromagnetism",
+      "name": "Электромагнетизм",
+      "subtopics": ["Магнитное поле", "Электромагнитная индукция"],
+      "formulas": [
+        {
+          "id": "emag_01",
+          "name": "Сила Ампера",
+          "formula": "F_A = B·I·l·sin α",
+          "latex": "F_A = BIl\\sin\\alpha",
+          "units": "Н",
+          "subtopic": "Магнитное поле",
+          "variables": {
+            "B": "магнитная индукция [Тл]",
+            "I": "сила тока [А]",
+            "l": "длина проводника в поле [м]",
+            "α": "угол между током и полем"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "emag_02",
+          "name": "Сила Лоренца",
+          "formula": "F_Л = q·v·B·sin α",
+          "latex": "F_\\text{Л} = qvB\\sin\\alpha",
+          "units": "Н",
+          "subtopic": "Магнитное поле",
+          "variables": {
+            "q": "заряд частицы [Кл]",
+            "v": "скорость частицы [м/с]",
+            "B": "магнитная индукция [Тл]",
+            "α": "угол между скоростью и полем"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "emag_03",
+          "name": "Магнитный поток",
+          "formula": "Φ = N·B·S·cos α",
+          "latex": "\\Phi = NBS\\cos\\alpha",
+          "units": "Вб",
+          "subtopic": "Магнитное поле",
+          "variables": {
+            "N": "число витков",
+            "B": "магнитная индукция [Тл]",
+            "S": "площадь контура [м²]",
+            "α": "угол между B и нормалью к площадке"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "emag_04",
+          "name": "ЭДС электромагнитной индукции",
+          "formula": "ε_инд = -ΔΦ / Δt",
+          "latex": "\\varepsilon_{\\text{инд}} = -\\frac{\\Delta\\Phi}{\\Delta t}",
+          "units": "В",
+          "subtopic": "Электромагнитная индукция",
+          "variables": {
+            "ΔΦ": "изменение магнитного потока [Вб]",
+            "Δt": "время [с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "emag_05",
+          "name": "ЭДС самоиндукции",
+          "formula": "ε_с = -L·ΔI / Δt",
+          "latex": "\\varepsilon_s = -L\\frac{\\Delta I}{\\Delta t}",
+          "units": "В",
+          "subtopic": "Электромагнитная индукция",
+          "variables": {
+            "L": "индуктивность катушки [Гн]",
+            "ΔI": "изменение тока [А]",
+            "Δt": "время [с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "emag_06",
+          "name": "Энергия магнитного поля катушки",
+          "formula": "W_M = L·I² / 2",
+          "latex": "W_M = \\frac{LI^2}{2}",
+          "units": "Дж",
+          "subtopic": "Электромагнитная индукция",
+          "variables": {
+            "L": "индуктивность [Гн]",
+            "I": "сила тока [А]"
+          },
+          "difficulty": 2,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "oscillations",
+      "name": "Колебания и волны",
+      "subtopics": ["Механические колебания", "Волны", "Переменный ток"],
+      "formulas": [
+        {
+          "id": "osc_01",
+          "name": "Период колебаний математического маятника",
+          "formula": "T = 2π·√(l / g)",
+          "latex": "T = 2\\pi\\sqrt{\\frac{l}{g}}",
+          "units": "с",
+          "subtopic": "Механические колебания",
+          "variables": {
+            "l": "длина нити [м]",
+            "g": "ускорение свободного падения = 10 м/с²"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "osc_02",
+          "name": "Период колебаний пружинного маятника",
+          "formula": "T = 2π·√(m / k)",
+          "latex": "T = 2\\pi\\sqrt{\\frac{m}{k}}",
+          "units": "с",
+          "subtopic": "Механические колебания",
+          "variables": {
+            "m": "масса груза [кг]",
+            "k": "жёсткость пружины [Н/м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "osc_03",
+          "name": "Максимальная скорость при колебаниях",
+          "formula": "v_max = A·ω",
+          "latex": "v_{\\max} = A\\omega",
+          "units": "м/с",
+          "subtopic": "Механические колебания",
+          "variables": {
+            "A": "амплитуда [м]",
+            "ω": "циклическая частота [рад/с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_04",
+          "name": "Длина волны",
+          "formula": "λ = v·T = v / ν",
+          "latex": "\\lambda = vT = \\frac{v}{\\nu}",
+          "units": "м",
+          "subtopic": "Волны",
+          "variables": {
+            "v": "скорость волны [м/с]",
+            "T": "период [с]",
+            "ν": "частота [Гц]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "osc_05",
+          "name": "Период колебаний LC-контура (формула Томсона)",
+          "formula": "T = 2π·√(L·C)",
+          "latex": "T = 2\\pi\\sqrt{LC}",
+          "units": "с",
+          "subtopic": "Переменный ток",
+          "variables": {
+            "L": "индуктивность [Гн]",
+            "C": "ёмкость [Ф]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_06",
+          "name": "Действующее (эффективное) значение тока",
+          "formula": "I_д = I_max / √2",
+          "latex": "I_\\text{д} = \\frac{I_{\\max}}{\\sqrt{2}}",
+          "units": "А",
+          "subtopic": "Переменный ток",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_07",
+          "name": "Действующее значение напряжения",
+          "formula": "U_д = U_max / √2",
+          "latex": "U_\\text{д} = \\frac{U_{\\max}}{\\sqrt{2}}",
+          "units": "В",
+          "subtopic": "Переменный ток",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_08",
+          "name": "Полное сопротивление цепи переменного тока",
+          "formula": "Z = √(R² + (X_L - X_C)²)",
+          "latex": "Z = \\sqrt{R^2 + (X_L - X_C)^2}",
+          "units": "Ом",
+          "subtopic": "Переменный ток",
+          "variables": {
+            "R": "активное сопротивление [Ом]",
+            "X_L": "индуктивное сопротивление [Ом]",
+            "X_C": "ёмкостное сопротивление [Ом]"
+          },
+          "difficulty": 3,
+          "starred": false
+        },
+        {
+          "id": "osc_09",
+          "name": "Ёмкостное сопротивление",
+          "formula": "X_C = 1 / (ω·C)",
+          "latex": "X_C = \\frac{1}{\\omega C}",
+          "units": "Ом",
+          "subtopic": "Переменный ток",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_10",
+          "name": "Индуктивное сопротивление",
+          "formula": "X_L = ω·L",
+          "latex": "X_L = \\omega L",
+          "units": "Ом",
+          "subtopic": "Переменный ток",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "osc_11",
+          "name": "Коэффициент трансформации",
+          "formula": "K = U₁ / U₂ = N₁ / N₂",
+          "latex": "K = \\frac{U_1}{U_2} = \\frac{N_1}{N_2}",
+          "units": "—",
+          "subtopic": "Переменный ток",
+          "notes": "K > 1 — понижающий, K < 1 — повышающий",
+          "difficulty": 2,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "optics",
+      "name": "Оптика",
+      "subtopics": ["Геометрическая оптика", "Волновая оптика"],
+      "formulas": [
+        {
+          "id": "opt_01",
+          "name": "Закон преломления света",
+          "formula": "sin α / sin β = n₂ / n₁",
+          "latex": "\\frac{\\sin\\alpha}{\\sin\\beta} = \\frac{n_2}{n_1}",
+          "units": "—",
+          "subtopic": "Геометрическая оптика",
+          "variables": {
+            "α": "угол падения",
+            "β": "угол преломления",
+            "n₁, n₂": "показатели преломления сред"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "opt_02",
+          "name": "Полное внутреннее отражение (предельный угол)",
+          "formula": "sin α_пр = n₁ / n₂  (n₂ > n₁ для второй среды)",
+          "latex": "\\sin\\alpha_{\\text{пр}} = \\frac{n_1}{n_2}",
+          "units": "—",
+          "subtopic": "Геометрическая оптика",
+          "variables": {
+            "n₁": "показатель преломления оптически плотной среды",
+            "n₂": "показатель преломления менее плотной среды"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "opt_03",
+          "name": "Оптическая сила линзы",
+          "formula": "D = 1 / F",
+          "latex": "D = \\frac{1}{F}",
+          "units": "дптр",
+          "subtopic": "Геометрическая оптика",
+          "variables": {
+            "F": "фокусное расстояние [м]"
+          },
+          "notes": "Собирающая: F > 0, D > 0. Рассеивающая: F < 0, D < 0",
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "opt_04",
+          "name": "Формула тонкой линзы",
+          "formula": "±1/F = ±1/d + ±1/f",
+          "latex": "\\pm\\frac{1}{F} = \\pm\\frac{1}{d} \\pm\\frac{1}{f}",
+          "units": "м⁻¹",
+          "subtopic": "Геометрическая оптика",
+          "variables": {
+            "F": "фокусное расстояние [м]",
+            "d": "расстояние до предмета [м]",
+            "f": "расстояние до изображения [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "opt_05",
+          "name": "Линейное увеличение линзы",
+          "formula": "Г = f / d = h_изобр / h_предм",
+          "latex": "\\Gamma = \\frac{f}{d} = \\frac{h_{\\text{изобр}}}{h_{\\text{предм}}}",
+          "units": "—",
+          "subtopic": "Геометрическая оптика",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "opt_06",
+          "name": "Формула дифракционной решётки",
+          "formula": "d·sin φ = m·λ",
+          "latex": "d\\sin\\varphi = m\\lambda",
+          "units": "м",
+          "subtopic": "Волновая оптика",
+          "variables": {
+            "d": "период решётки [м]",
+            "φ": "угол дифракции",
+            "m": "порядок дифракции (0, ±1, ±2...)",
+            "λ": "длина волны [м]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "opt_07",
+          "name": "Интерференция Юнга (расстояние между максимумами)",
+          "formula": "Δx = λ·L / d",
+          "latex": "\\Delta x = \\frac{\\lambda L}{d}",
+          "units": "м",
+          "subtopic": "Волновая оптика",
+          "variables": {
+            "λ": "длина волны [м]",
+            "L": "расстояние до экрана [м]",
+            "d": "расстояние между щелями [м]"
+          },
+          "difficulty": 3,
+          "starred": false
+        }
+      ]
+    },
+    {
+      "id": "quantum",
+      "name": "Квантовая и ядерная физика",
+      "subtopics": ["Квантовая оптика", "Атомная физика", "Ядерная физика"],
+      "formulas": [
+        {
+          "id": "qn_01",
+          "name": "Энергия фотона",
+          "formula": "E = h·ν",
+          "latex": "E = h\\nu",
+          "units": "Дж",
+          "subtopic": "Квантовая оптика",
+          "variables": {
+            "h": "постоянная Планка = 6.63·10⁻³⁴ Дж·с",
+            "ν": "частота света [Гц]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "qn_02",
+          "name": "Энергия фотона через длину волны",
+          "formula": "E = h·c / λ",
+          "latex": "E = \\frac{hc}{\\lambda}",
+          "units": "Дж",
+          "subtopic": "Квантовая оптика",
+          "variables": {
+            "h": "= 6.63·10⁻³⁴ Дж·с",
+            "c": "скорость света = 3·10⁸ м/с",
+            "λ": "длина волны [м]"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "qn_03",
+          "name": "Импульс фотона",
+          "formula": "p = h·ν / c = h / λ",
+          "latex": "p = \\frac{h\\nu}{c} = \\frac{h}{\\lambda}",
+          "units": "кг·м/с",
+          "subtopic": "Квантовая оптика",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_04",
+          "name": "Уравнение Эйнштейна для фотоэффекта",
+          "formula": "h·ν = A_вых + m·v²_max / 2",
+          "latex": "h\\nu = A_{\\text{вых}} + \\frac{mv^2_{\\max}}{2}",
+          "units": "Дж",
+          "subtopic": "Квантовая оптика",
+          "variables": {
+            "h·ν": "энергия фотона [Дж]",
+            "A_вых": "работа выхода электрона [Дж]",
+            "mv²/2": "максимальная кинетическая энергия электрона [Дж]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_05",
+          "name": "Красная граница фотоэффекта",
+          "formula": "ν_min = A_вых / h   или   λ_max = h·c / A_вых",
+          "latex": "\\nu_{\\min} = \\frac{A_{\\text{вых}}}{h} \\quad \\lambda_{\\max} = \\frac{hc}{A_{\\text{вых}}}",
+          "units": "Гц / м",
+          "subtopic": "Квантовая оптика",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_06",
+          "name": "Второй постулат Бора",
+          "formula": "h·ν_mn = |E_n - E_m|",
+          "latex": "h\\nu_{mn} = |E_n - E_m|",
+          "units": "Дж",
+          "subtopic": "Атомная физика",
+          "variables": {
+            "ν_mn": "частота испускаемого/поглощаемого фотона [Гц]",
+            "E_n, E_m": "энергии уровней атома [Дж]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_07",
+          "name": "Состав ядра",
+          "formula": "A = Z + N",
+          "latex": "A = Z + N",
+          "units": "—",
+          "subtopic": "Ядерная физика",
+          "variables": {
+            "A": "массовое число (нуклоны)",
+            "Z": "зарядовое число (протоны)",
+            "N": "число нейтронов"
+          },
+          "difficulty": 1,
+          "starred": false
+        },
+        {
+          "id": "qn_08",
+          "name": "Альфа-распад",
+          "formula": "ᴬ_ᴢX → ᴬ⁻⁴_ᴢ₋₂Y + ⁴_₂He",
+          "latex": "{}^A_Z X \\rightarrow {}^{A-4}_{Z-2}Y + {}^4_2\\text{He}",
+          "units": "—",
+          "subtopic": "Ядерная физика",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_09",
+          "name": "Бета-минус-распад",
+          "formula": "ᴬ_ᴢX → ᴬ_ᴢ₊₁Y + ⁰_₋₁e",
+          "latex": "{}^A_Z X \\rightarrow {}^{A}_{Z+1}Y + {}^{0}_{-1}e",
+          "units": "—",
+          "subtopic": "Ядерная физика",
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_10",
+          "name": "Закон радиоактивного распада",
+          "formula": "N = N₀ · 2^(-t/T½)",
+          "latex": "N = N_0 \\cdot 2^{-t/T_{1/2}}",
+          "units": "—",
+          "subtopic": "Ядерная физика",
+          "variables": {
+            "N₀": "начальное число ядер",
+            "t": "время [с]",
+            "T½": "период полураспада [с]"
+          },
+          "difficulty": 2,
+          "starred": false
+        },
+        {
+          "id": "qn_11",
+          "name": "Дефект масс",
+          "formula": "ΔM = Z·m_p + N·m_n - M_я",
+          "latex": "\\Delta M = Zm_p + Nm_n - M_\\text{я}",
+          "units": "кг",
+          "subtopic": "Ядерная физика",
+          "variables": {
+            "m_p": "масса протона = 1.673·10⁻²⁷ кг",
+            "m_n": "масса нейтрона = 1.675·10⁻²⁷ кг",
+            "M_я": "масса ядра [кг]"
+          },
+          "difficulty": 3,
+          "starred": false
+        },
+        {
+          "id": "qn_12",
+          "name": "Энергия связи ядра",
+          "formula": "E_св = ΔM·c²",
+          "latex": "E_{\\text{св}} = \\Delta M c^2",
+          "units": "Дж",
+          "subtopic": "Ядерная физика",
+          "variables": {
+            "ΔM": "дефект масс [кг]",
+            "c": "скорость света = 3·10⁸ м/с"
+          },
+          "difficulty": 3,
+          "starred": false
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "g": { "value": 10, "units": "м/с²", "name": "Ускорение свободного падения (в задачах ЦТ)" },
+    "G": { "value": "6.67·10⁻¹¹", "units": "Н·м²/кг²", "name": "Гравитационная постоянная" },
+    "k": { "value": "9·10⁹", "units": "Н·м²/Кл²", "name": "Постоянная Кулона" },
+    "ε₀": { "value": "8.85·10⁻¹²", "units": "Ф/м", "name": "Электрическая постоянная" },
+    "e": { "value": "1.6·10⁻¹⁹", "units": "Кл", "name": "Элементарный заряд" },
+    "N_A": { "value": "6.022·10²³", "units": "моль⁻¹", "name": "Число Авогадро" },
+    "R": { "value": 8.31, "units": "Дж/(моль·К)", "name": "Универсальная газовая постоянная" },
+    "k_B": { "value": "1.38·10⁻²³", "units": "Дж/К", "name": "Постоянная Больцмана" },
+    "h": { "value": "6.63·10⁻³⁴", "units": "Дж·с", "name": "Постоянная Планка" },
+    "c": { "value": "3·10⁸", "units": "м/с", "name": "Скорость света в вакууме" },
+    "m_e": { "value": "9.11·10⁻³¹", "units": "кг", "name": "Масса электрона" },
+    "m_p": { "value": "1.673·10⁻²⁷", "units": "кг", "name": "Масса протона" },
+    "m_n": { "value": "1.675·10⁻²⁷", "units": "кг", "name": "Масса нейтрона" }
+  }
+}
