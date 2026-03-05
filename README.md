@@ -129,4 +129,6 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 See [PLAN.md](PLAN.md) for the phased technical roadmap.
 
-License: [MIT](LICENSE.txt)
+## License
+
+[MIT](LICENSE.txt)
