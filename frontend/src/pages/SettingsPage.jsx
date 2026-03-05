@@ -3,7 +3,7 @@ import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
 import { X, ChevronRight } from "lucide-react";
 import { APP_VERSION } from "@/version";
-import { CACHE_TS_KEY } from "@/utils/generateQuestions";
+import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
 
 const SYNC_KEYS = [
   "streak_days", "streak_last_date",
@@ -11,12 +11,14 @@ const SYNC_KEYS = [
   "daily_goal", "topic_stats", "achievements",
   "rt_results", "exam_date", "exam_type",
   "onboarding_complete",
+  "notif_enabled", "notif_time",
+  "tasks_session", "theory_session", "exam_session",
 ];
 
-function formatQuestionsTs(iso) {
+function formatGeneratedAt(iso) {
   if (!iso) return "нет данных";
   const d = new Date(iso);
-  return d.toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function Modal({ title, children, onClose }) {
@@ -58,7 +60,7 @@ export default function SettingsPage() {
   const [syncCodeInput, setSyncCodeInput] = useState("");
   const [syncError, setSyncError] = useState("");
   const [syncSuccess, setSyncSuccess] = useState(false);
-  const questionsUpdatedAt = formatQuestionsTs(localStorage.getItem(CACHE_TS_KEY));
+  const questionsUpdatedAt = formatGeneratedAt(localStorage.getItem(CACHE_GENERATED_AT_KEY));
 
   const resetSync = () => {
     setModal(null);
@@ -114,6 +116,9 @@ export default function SettingsPage() {
             : "Ошибка загрузки данных"
         );
       }
+      // Сначала очищаем все известные ключи, чтобы не оставалось "лишних" данных
+      SYNC_KEYS.forEach((key) => localStorage.removeItem(key));
+      // Затем восстанавливаем всё из резервной копии
       Object.entries(json.data).forEach(([key, value]) =>
         localStorage.setItem(key, value)
       );

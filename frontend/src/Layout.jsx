@@ -3,6 +3,7 @@ import { createPageUrl } from "@/utils";
 import { Link, useLocation } from "react-router-dom";
 import { Home, FileText, BarChart2, Settings, Moon, Sun, GraduationCap, ClipboardList } from "lucide-react";
 import { checkAndUpdateStreak } from "@/utils/storage";
+import { prefetchQuestions } from "@/utils/generateQuestions";
 
 const SESSION_KEYS = ["tasks_session", "theory_session", "exam_session"];
 
@@ -17,9 +18,13 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [activeCount, setActiveCount] = useState(0);
+  const [noCache, setNoCache] = useState(false);
 
   useEffect(() => {
     checkAndUpdateStreak();
+    prefetchQuestions().catch((err) => {
+      if (err.message === "no_cache") setNoCache(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -36,6 +41,22 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <>
+      {noCache && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
+            <p className="font-bold text-base" style={{ color: "var(--text)" }}>Необходим интернет</p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              При первом запуске нужно загрузить вопросы. Подключись к интернету и повтори попытку.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ background: "#F97316" }}>
+              Попробовать снова
+            </button>
+          </div>
+        </div>
+      )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         * { font-family: 'Inter', sans-serif; }
