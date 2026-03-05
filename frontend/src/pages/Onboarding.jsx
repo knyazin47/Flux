@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
-import { createPageUrl } from "@/utils";
-import { ChevronRight } from "lucide-react";
 
 export default function Onboarding() {
-  const [examType, setExamType] = useState("ЦТ");
-  const [examDate, setExamDate] = useState("2026-06-12");
   const [dailyGoal, setDailyGoal] = useState("10");
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | granted | denied
 
   useEffect(() => {
     if (localStorage.getItem("onboarding_complete") === "true") {
-      window.location.href = createPageUrl("Dashboard");
+      window.location.href = "/Dashboard";
     }
   }, []);
 
@@ -22,15 +18,10 @@ export default function Onboarding() {
 
   const handleStart = () => {
     localStorage.setItem("onboarding_complete", "true");
-    localStorage.setItem("exam_type", examType);
-    localStorage.setItem("exam_date", examDate);
+    localStorage.setItem("exam_type", "ЦТ");
+    localStorage.setItem("exam_date", "2026-06-05");
     localStorage.setItem("daily_goal", dailyGoal);
-    window.location.href = createPageUrl("Dashboard");
-  };
-
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    window.location.href = "/Dashboard";
   };
 
   return (
@@ -40,49 +31,11 @@ export default function Onboarding() {
         {/* TOP SECTION */}
         <div className="flex flex-col items-center gap-3 pt-4">
           <span style={{ fontSize: 64, lineHeight: 1 }}>⚛️📚🔥</span>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Физика ЦТ/ЦЭ</h1>
-          <p className="text-sm text-gray-400">Подготовка к экзамену 2026</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Физика ЦТ 2026</h1>
+          <p className="text-sm text-gray-400">Подготовка к экзамену • 5 июня 2026</p>
         </div>
 
         <div className="w-full h-px bg-gray-100" />
-
-        {/* EXAM TYPE */}
-        <div className="flex flex-col gap-3">
-          <label className="text-sm font-semibold text-gray-700">Выбери экзамен:</label>
-          <div className="flex gap-2">
-            {["ЦТ", "ЦЭ", "Оба"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setExamType(type)}
-                className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border
-                  ${examType === type
-                    ? "bg-orange-500 text-white border-orange-500 shadow-sm shadow-orange-200"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-orange-300"
-                  }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* EXAM DATE */}
-        <div className="flex flex-col gap-3">
-          <label className="text-sm font-semibold text-gray-700">Дата экзамена:</label>
-          <div className="relative">
-            <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-3.5 shadow-sm">
-              <span className="text-xl">📅</span>
-              <span className="flex-1 text-sm text-gray-700 font-medium">{formatDate(examDate)}</span>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              <input
-                type="date"
-                value={examDate}
-                onChange={(e) => setExamDate(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* DAILY GOAL */}
         <div className="flex flex-col gap-3">

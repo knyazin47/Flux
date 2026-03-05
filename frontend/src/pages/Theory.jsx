@@ -1,10 +1,8 @@
 import { useState } from "react";
 import Card from "@/components/ui/Card";
-import TopicBadge from "@/components/ui/TopicBadge";
 import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { ArrowLeft, ChevronDown, Star, Check, X } from "lucide-react";
-import { createPageUrl } from "@/utils";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
@@ -75,24 +73,30 @@ export default function Theory() {
   };
 
   const next = () => {
-    if (qIndex + 1 >= sessionQ.length) {
-      // Сохраняем статистику
-      const byTopic = {};
-      answers.concat([{ correct: selected === sessionQ[qIndex].correct, topic: sessionQ[qIndex].topic }])
-        .forEach(({ topic, correct }) => {
+    const q = sessionQ[qIndex];
+    const isLast = qIndex + 1 >= sessionQ.length;
+    const currentCorrect = selected === q.correct;
+
+    setSelected(null); // trigger close animation
+
+    setTimeout(() => {
+      if (isLast) {
+        const allAnswers = [...answers, { correct: currentCorrect, topic: q.topic }];
+        const byTopic = {};
+        allAnswers.forEach(({ topic, correct }) => {
           if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
           byTopic[topic].total += 1;
           if (correct) byTopic[topic].correct += 1;
         });
-      Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
-        updateTopicStats(topic, correct, total);
-      });
-      checkAchievements();
-      setView("finished");
-      return;
-    }
-    setQIndex((i) => i + 1);
-    setSelected(null);
+        Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
+          updateTopicStats(topic, correct, total);
+        });
+        checkAchievements();
+        setView("finished");
+        return;
+      }
+      setQIndex((i) => i + 1);
+    }, 320);
   };
 
   const weakTopics = sessionQ.reduce((acc, q, i) => {
@@ -168,14 +172,11 @@ export default function Theory() {
           <ProgressBar value={qIndex + 1} max={sessionQ.length} />
           <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>Вопрос {qIndex + 1} / {sessionQ.length}</p>
         </div>
-        <TopicBadge label={q.topic} />
         <Card>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: "#F97316" }}>
+            {q.topic}
+          </p>
           <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
-          {q.formula && (
-            <div className="mt-3 py-3 px-4 rounded-xl text-center overflow-x-auto" style={{ background: "var(--bg)" }}>
-              <TeX formula={q.formula} />
-            </div>
-          )}
         </Card>
         <div className="flex flex-col gap-2">
           {q.options.map((opt, idx) => {
@@ -203,22 +204,48 @@ export default function Theory() {
             );
           })}
         </div>
-        {selected !== null && (
-          <div className="flex flex-col gap-3">
-            {q.explanation && (
-              <Card style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
-                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>💡 {q.explanation}</p>
-                <button onClick={() => window.location.href = createPageUrl("Cheatsheet")}
-                  className="mt-2 text-xs font-semibold" style={{ color: "#F97316" }}>
-                  → Открыть шпаргалку
-                </button>
-              </Card>
-            )}
-            <OrangeButton onClick={next}>
-              {qIndex + 1 >= sessionQ.length ? "Завершить →" : "Следующий →"}
-            </OrangeButton>
-          </div>
-        )}
+
+        <div style={{
+          overflow: "hidden",
+          maxHeight: selected !== null ? "400px" : "0px",
+          opacity: selected !== null ? 1 : 0,
+          transition: "max-height 0.35s ease, opacity 0.3s ease",
+        }}>
+          {(q.formula || q.explanation) && (
+            <div className="rounded-2xl p-4 flex flex-col gap-3 mt-1" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+              {q.formula && (
+                <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
+                  <TeX formula={q.formula} />
+                </div>
+              )}
+              {q.explanation && (
+                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>
+                  💡 {q.explanation}
+                </p>
+              )}
+              <button onClick={() => window.location.href = "/Cheatsheet"}
+                className="text-xs font-semibold text-left" style={{ color: "#F97316" }}>
+                → Открыть шпаргалку
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Sticky next button above bottom nav */}
+        <div style={{
+          position: "fixed",
+          bottom: 64,
+          left: 0,
+          right: 0,
+          padding: "12px 16px",
+          zIndex: 20,
+          transform: selected !== null ? "translateY(0)" : "translateY(120%)",
+          transition: "transform 0.35s ease",
+        }}>
+          <OrangeButton onClick={next}>
+            {qIndex + 1 >= sessionQ.length ? "Завершить →" : "Следующий →"}
+          </OrangeButton>
+        </div>
       </div>
     );
   }

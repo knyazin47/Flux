@@ -6,7 +6,8 @@
       "Bash(npm install)",
       "Bash(powershell -Command \"cd ''d:\\\\ClaudeCode\\\\Physics\\\\frontend''; npm install\")",
       "Skill(claude-developer-platform)",
-      "Skill(claude-developer-platform:*)"
+      "Skill(claude-developer-platform:*)",
+      "Bash(git -C \"d:/ClaudeCode/Physics\" status)"
     ]
   }
 }

@@ -269,31 +269,42 @@ export default function Tasks() {
       <div
         style={{
           overflow: "hidden",
-          maxHeight: selected !== null ? "500px" : "0px",
+          maxHeight: selected !== null ? "400px" : "0px",
           opacity: selected !== null ? 1 : 0,
           transition: "max-height 0.35s ease, opacity 0.3s ease",
         }}
       >
-        <div className="flex flex-col gap-3 pt-1">
-          {(q.formula || q.explanation) && (
-            <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
-              {q.formula && (
-                <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
-                  <TeX formula={q.formula} />
-                </div>
-              )}
-              {q.explanation && (
-                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>
-                  💡 {q.explanation}
-                </p>
-              )}
-            </div>
-          )}
-          <OrangeButton onClick={() => handleNext()}>
-            {qIndex + 1 >= sessionQuestions.length ? "Завершить →" : "Следующий →"}
-          </OrangeButton>
-        </div>
+        {(q.formula || q.explanation) && (
+          <div className="rounded-2xl p-4 flex flex-col gap-3 mt-1" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+            {q.formula && (
+              <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
+                <TeX formula={q.formula} />
+              </div>
+            )}
+            {q.explanation && (
+              <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>
+                💡 {q.explanation}
+              </p>
+            )}
+          </div>
+        )}
       </div>
+    </div>
+
+    {/* Sticky next button above bottom nav */}
+    <div style={{
+      position: "fixed",
+      bottom: 64,
+      left: 0,
+      right: 0,
+      padding: "12px 16px",
+      zIndex: 20,
+      transform: selected !== null ? "translateY(0)" : "translateY(120%)",
+      transition: "transform 0.35s ease",
+    }}>
+      <OrangeButton onClick={() => handleNext()}>
+        {qIndex + 1 >= sessionQuestions.length ? "Завершить →" : "Следующий →"}
+      </OrangeButton>
     </div>
   );
 
