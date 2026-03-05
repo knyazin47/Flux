@@ -213,6 +213,7 @@ export default function Tasks() {
   // ── Вопрос ────────────────────────────────────────────────────────────────────
   const q = sessionQuestions[qIndex];
   if (view === "question" && q) return (
+    <>
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between pt-2">
         <button onClick={() => { clearInterval(timerRef.current); setView("start"); }}
@@ -306,6 +307,7 @@ export default function Tasks() {
         {qIndex + 1 >= sessionQuestions.length ? "Завершить →" : "Следующий →"}
       </OrangeButton>
     </div>
+    </>
   );
 
   // ── Результаты ────────────────────────────────────────────────────────────────
