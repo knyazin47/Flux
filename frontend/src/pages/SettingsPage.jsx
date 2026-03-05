@@ -292,9 +292,9 @@ export default function SettingsPage() {
       {/* Вопросы */}
       <SectionHeader label="ВОПРОСЫ" />
       <Card className="!py-0 !px-4">
-        <div className="flex items-center justify-between py-3.5">
+        <div className="flex flex-col gap-0.5 py-3.5">
           <span className="text-sm" style={{ color: "var(--text)" }}>Последнее обновление</span>
-          <span className="text-sm" style={{ color: "var(--muted)" }}>{questionsUpdatedAt}</span>
+          <span className="text-xs" style={{ color: "var(--muted)" }}>{questionsUpdatedAt}</span>
         </div>
       </Card>
 
