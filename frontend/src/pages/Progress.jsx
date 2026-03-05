@@ -4,19 +4,24 @@ import ProgressBar from "@/components/ui/ProgressBar";
 import OrangeButton from "@/components/ui/OrangeButton";
 import { X } from "lucide-react";
 
-const TOPICS = ["Механика", "Электричество", "Оптика", "Термодинамика", "Ядерная физика", "Колебания", "Волны", "Магнетизм", "Квантовая"];
+const TOPICS = [
+  "Механика", "Молекулярная физика", "Термодинамика",
+  "Электростатика", "Постоянный ток", "Электромагнетизм",
+  "Колебания и волны", "Оптика", "Квантовая и ядерная физика",
+];
 
-const TOPIC_STATS = [
-  { name: "Механика", pct: 68 },
-  { name: "Электричество", pct: 45 },
-  { name: "Оптика", pct: 30 },
-  { name: "Термодинамика", pct: 72 },
-  { name: "Ядерная физика", pct: 15 },
-  { name: "Колебания", pct: 55 },
-  { name: "Волны", pct: 40 },
-  { name: "Магнетизм", pct: 20 },
-  { name: "Квантовая", pct: 10 },
-].sort((a, b) => a.pct - b.pct);
+function loadTopicStats() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("topic_stats") || "{}");
+    return TOPICS.map(name => {
+      const s = raw[name];
+      const pct = s?.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
+      return { name, pct, correct: s?.correct ?? 0, total: s?.total ?? 0 };
+    }).sort((a, b) => a.pct - b.pct);
+  } catch {
+    return TOPICS.map(name => ({ name, pct: 0, correct: 0, total: 0 }));
+  }
+}
 
 const ACHIEVEMENTS = [
   { emoji: "🔥", name: "Неостановимый", desc: "Стрик 7 дней", unlocked: false },
@@ -32,7 +37,15 @@ const ACHIEVEMENTS = [
 
 const barColor = (pct) => pct >= 70 ? "#22C55E" : pct >= 50 ? "#EAB308" : pct >= 30 ? "#F97316" : "#EF4444";
 
-const WEEK_DATA = Array.from({ length: 30 }, (_, i) => Math.random() > 0.4 ? Math.floor(Math.random() * 80) : 0);
+function loadWeekData() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("activity_history") || "[]");
+    const arr = Array.isArray(raw) ? raw : [];
+    return Array.from({ length: 30 }, (_, i) => arr[i] ?? 0);
+  } catch {
+    return Array(30).fill(0);
+  }
+}
 
 const TABS = ["Статистика", "Темы", "РТ/ДРТ", "🏆"];
 
@@ -86,12 +99,15 @@ export default function Progress() {
     try { return JSON.parse(localStorage.getItem("rt_results") || "[]"); } catch { return []; }
   });
 
+  const topicStats = loadTopicStats();
+  const weekData = loadWeekData();
+
   const totalXP = parseInt(localStorage.getItem("total_xp") || "0");
   const streak = parseInt(localStorage.getItem("streak") || "0");
   const totalAnswers = parseInt(localStorage.getItem("total_answers") || "0");
   const accuracy = totalAnswers > 0 ? Math.round((parseInt(localStorage.getItem("correct_answers") || "0") / totalAnswers) * 100) : 0;
 
-  const maxBar = Math.max(...WEEK_DATA, 1);
+  const maxBar = Math.max(...weekData, 1);
 
   const saveResult = (r) => {
     const next = [r, ...rtResults];
@@ -138,7 +154,7 @@ export default function Progress() {
           <Card>
             <p className="text-sm font-semibold mb-4" style={{ color: "var(--text)" }}>Активность за 30 дней</p>
             <div className="flex items-end gap-[2px] h-16">
-              {WEEK_DATA.map((v, i) => (
+              {weekData.map((v, i) => (
                 <div key={i} className="flex-1 rounded-t"
                   style={{ height: `${Math.max(2, (v / maxBar) * 56)}px`, background: v > 0 ? "#F97316" : "var(--border)" }} />
               ))}
@@ -152,7 +168,7 @@ export default function Progress() {
         <Card>
           <p className="text-sm font-semibold mb-4" style={{ color: "var(--text)" }}>Знание по темам</p>
           <div className="flex flex-col gap-4">
-            {TOPIC_STATS.map(t => (
+            {topicStats.map(t => (
               <div key={t.name}>
                 <div className="flex justify-between text-xs mb-1.5">
                   <span style={{ color: "var(--text)" }}>{t.name}</span>

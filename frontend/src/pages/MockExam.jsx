@@ -3,22 +3,14 @@ import Card from "@/components/ui/Card";
 import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { X, Flag } from "lucide-react";
+import { generateQuestions } from "@/utils/generateQuestions";
 
-const TOPICS = ["Механика", "Электричество", "Оптика", "Термодинамика", "Ядерная физика", "Колебания", "Волны", "Магнетизм", "Квантовая"];
-const LABELS = ["А", "Б", "В", "Г", "Д"];
-
-const QUESTION_BANK = [
-  { id: 1, topic: "Механика", text: "Тело массой 2 кг движется с ускорением 3 м/с². Сила, действующая на тело:", options: ["6 Н", "5 Н", "4 Н", "8 Н", "1 Н"], correct: 0 },
-  { id: 2, topic: "Электричество", text: "Напряжение 12 В, ток 2 А. Сопротивление:", options: ["6 Ом", "24 Ом", "14 Ом", "10 Ом", "3 Ом"], correct: 0 },
-  { id: 3, topic: "Оптика", text: "Угол падения луча 30°. Угол отражения:", options: ["30°", "60°", "45°", "90°", "15°"], correct: 0 },
-  { id: 4, topic: "Термодинамика", text: "Q = 500 Дж, A = 200 Дж. Изменение внутренней энергии:", options: ["300 Дж", "700 Дж", "500 Дж", "200 Дж", "100 Дж"], correct: 0 },
-  { id: 5, topic: "Ядерная физика", text: "Период полураспада 10 лет. Через 20 лет распадётся:", options: ["75%", "50%", "25%", "90%", "100%"], correct: 0 },
-  { id: 6, topic: "Колебания", text: "Период маятника при l = g·(T/2π)²:", options: ["Верно", "Неверно", "Частично верно", "Зависит от массы", "Зависит от амплитуды"], correct: 0 },
-  { id: 7, topic: "Волны", text: "Скорость звука 340 м/с, частота 680 Гц. Длина волны:", options: ["0,5 м", "1 м", "2 м", "0,25 м", "4 м"], correct: 0 },
-  { id: 8, topic: "Магнетизм", text: "Сила Лоренца при α = 90°, q = 1 Кл, v = 1 м/с, B = 1 Тл:", options: ["1 Н", "0 Н", "2 Н", "0,5 Н", "π Н"], correct: 0 },
-  { id: 9, topic: "Квантовая", text: "Энергия фотона при ν = 10¹⁵ Гц (h = 6,6·10⁻³⁴ Дж·с):", options: ["6,6·10⁻¹⁹ Дж", "6,6·10⁻³⁴ Дж", "10⁻¹⁵ Дж", "1 эВ", "13,6 эВ"], correct: 0 },
-  { id: 10, topic: "Механика", text: "Тело падает свободно с h = 20 м. Скорость удара (g=10):", options: ["20 м/с", "10 м/с", "14 м/с", "40 м/с", "5 м/с"], correct: 0 },
+const TOPICS = [
+  "Механика", "Молекулярная физика", "Термодинамика",
+  "Электростатика", "Постоянный ток", "Электромагнетизм",
+  "Колебания и волны", "Оптика", "Квантовая и ядерная физика",
 ];
+const LABELS = ["А", "Б", "В", "Г", "Д"];
 
 const barColor = (pct) => pct >= 70 ? "#22C55E" : pct >= 50 ? "#EAB308" : pct >= 30 ? "#F97316" : "#EF4444";
 
@@ -43,6 +35,7 @@ export default function MockExam() {
   const [confirmExit, setConfirmExit] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [saveModal, setSaveModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const timerRef = useRef(null);
 
   const fullQ = 30, miniQ = 10;
@@ -57,20 +50,42 @@ export default function MockExam() {
     });
   };
 
-  const startExam = () => {
-    const pool = QUESTION_BANK.filter(q => selectedTopics.has(q.topic));
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    const qs = Array.from({ length: totalQ }, (_, i) => shuffled[i % shuffled.length]);
-    setQuestions(qs);
-    setQIndex(0);
-    setUserAnswers({});
-    setFlagged(new Set());
-    setTimeLeft(totalTime);
-    setView("exam");
-    timerRef.current = setInterval(() => setTimeLeft(t => { if (t <= 1) { clearInterval(timerRef.current); setView("results"); return 0; } return t - 1; }), 1000);
+  const startExam = async () => {
+    setLoading(true);
+    try {
+      const perTopic = Math.ceil(totalQ / selectedTopics.size);
+      const batches = await Promise.all(
+        [...selectedTopics].map(topic => generateQuestions(topic, perTopic, 2))
+      );
+      const pool = batches.flat().sort(() => Math.random() - 0.5).slice(0, totalQ);
+      setQuestions(pool);
+      setQIndex(0);
+      setUserAnswers({});
+      setFlagged(new Set());
+      setTimeLeft(totalTime);
+      setView("exam");
+      timerRef.current = setInterval(() => setTimeLeft(t => { if (t <= 1) { clearInterval(timerRef.current); setView("results"); return 0; } return t - 1; }), 1000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => () => clearInterval(timerRef.current), []);
+
+  // Сохраняем topic_stats когда экзамен заканчивается (таймер или последний вопрос)
+  useEffect(() => {
+    if (view !== "results" || questions.length === 0) return;
+    try {
+      const stats = JSON.parse(localStorage.getItem("topic_stats") || "{}");
+      questions.forEach((q, i) => {
+        const t = q.topic || "Другое";
+        if (!stats[t]) stats[t] = { correct: 0, total: 0 };
+        stats[t].total += 1;
+        if (userAnswers[i] === q.correct) stats[t].correct += 1;
+      });
+      localStorage.setItem("topic_stats", JSON.stringify(stats));
+    } catch {}
+  }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAnswer = (idx) => {
     if (userAnswers[qIndex] !== undefined) return;
@@ -145,7 +160,9 @@ export default function MockExam() {
         </div>
       </div>
 
-      <OrangeButton onClick={startExam} disabled={selectedTopics.size === 0}>Начать экзамен</OrangeButton>
+      <OrangeButton onClick={startExam} disabled={selectedTopics.size === 0 || loading}>
+        {loading ? "Загрузка вопросов..." : "Начать экзамен"}
+      </OrangeButton>
     </div>
   );
 

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, X } from "lucide-react";
-import { createPageUrl } from "@/utils";
 
 function Modal({ title, children, onClose }) {
   return (
@@ -54,7 +53,7 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     localStorage.clear();
-    window.location.href = createPageUrl("Onboarding");
+    window.location.href = "/Onboarding";
   };
 
   return (
