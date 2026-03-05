@@ -13,6 +13,7 @@ npm run dev        # start dev server (Vite, http://localhost:5173)
 npm run build      # production build
 npm run lint       # ESLint (quiet mode)
 npm run lint:fix   # ESLint with auto-fix
+npm run typecheck  # TypeScript type-check (no emit)
 npm run preview    # preview production build locally
 ```
 
@@ -26,6 +27,10 @@ VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
 ```
 
+### Vercel serverless (api/generate.js)
+
+`POST /api/generate` generates questions on-demand via Claude Haiku. Requires `ANTHROPIC_API_KEY` set in the Vercel project environment (not in `.env.local`). Accepts `{ topic, count, difficulty, formulaContext }` in the request body.
+
 ### Daily questions generation (CI)
 
 GitHub Action runs daily at 09:00 Minsk time. Can be triggered manually via `workflow_dispatch`. The script uses the `claude` CLI (OAuth auth via secrets) to generate questions and commits `frontend/public/daily-questions.json`.
@@ -35,6 +40,30 @@ To run locally:
 node scripts/generate-daily.js
 ```
 
+## Development Guidelines
+
+### Branding & Identity (Flux)
+- **Project Name:** Always use **"Flux"**. Never use "Lovable", "BASE44", or "Physics" as the standalone app name.
+- **Terminology:**
+  - Main topic header: **"Физика"** (no emojis like ⚛️)
+  - Achievements header: **"Достижения"** (no trophy 🏆 icon)
+  - Top Level Rank: **"Эпштейн"** (ensure correct spelling)
+- **UI Cleanliness:** Labels like "← Не знаю | Знаю →" are forbidden. Interface must remain minimalist.
+
+### Versioning Protocol (SemVer)
+Maintain the version in `frontend/package.json` and sync it with the UI:
+- **Patch (0.0.x):** Bug fixes, style tweaks, minor text edits.
+- **Minor (0.x.0):** New features, logic changes, new content modules.
+- **Major (x.0.0):** Breaking changes, rebranding, or complete architecture overhauls.
+- **Commit Format:** Every commit must start with the version, e.g., `v1.2.3: description`.
+
+### UX Logic: Active Recall
+- **FormulaCards:** When moving to the next card, reset state to `isFlipped: false`. The user must always perform a manual "Reveal" action.
+
+### Code & Repository Hygiene
+- **Zero Branding Leak:** Ensure no "lovable-tag" or "base44-id" remains in the DOM or metadata.
+- **Documentation:** README.md is for public project presentation only. Move instructional content to `docs/`.
+
 ## Architecture
 
 ### Repository structure
@@ -42,6 +71,8 @@ node scripts/generate-daily.js
 ```
 flux/
   frontend/          # React PWA (Vite)
+  api/
+    generate.js      # Vercel Serverless Function — POST /api/generate (on-demand questions via Claude)
   data/
     formulas.json    # Master formula database (all 9 topics, with LaTeX)
   scripts/
@@ -56,11 +87,11 @@ flux/
 
 The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6 with `src/pages.config.js`. Auth is a no-op stub (`src/lib/AuthContext.jsx`) — the app is fully local with no backend.
 
-**Routing:** `src/pages.config.js` registers all pages and the shared `Layout`. Routes are auto-derived from page names via `createPageUrl()` in `src/utils/index.ts`. The Onboarding page bypasses the Layout (no nav).
+**Routing:** `src/pages.config.js` registers all pages and the shared `Layout`. Routes are `/{PageName}` based on the key in the `PAGES` object. `createPageUrl(name)` in `src/utils/index.ts` generates these URLs. The file header claims auto-generation but it is manually maintained. The Onboarding page bypasses the Layout (no nav).
 
 **Layout (`src/Layout.jsx`):** Sticky header (56px) + fixed bottom nav (64px) + scrollable `<main>`. Manages dark/light theme via CSS variables on `:root`/`.dark` and `localStorage("theme")`. Shows a "resume session" Play button in the header when `tasks_session` or `theory_session` exist in localStorage.
 
-**Pages (9 total):**
+**Pages (10 total):**
 - `Onboarding` - exam date, daily goal, push permission setup
 - `Dashboard` - countdown, streak, XP, daily progress
 - `Tasks` - daily question session (5-choice MCQ, timer, explanations)
@@ -70,6 +101,7 @@ The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6
 - `MockExam` - full (30q/90min) or mini (10q/30min) exam simulation
 - `Progress` - stats, topic heatmap, RT/DRT tracker, achievements
 - `SettingsPage` - theme, exam date, notifications, reset
+- `ActiveSessions` - view and resume in-progress sessions
 
 **State management:** All state is in `localStorage` only (no backend, no accounts). The utility layer is in `src/utils/storage.js`:
 - `lsGet(key, fallback)` / `lsSet(key, value)` - safe localStorage wrappers
