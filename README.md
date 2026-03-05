@@ -119,7 +119,7 @@ All commands run from `frontend/`:
 | Mock exam completed | +100 |
 | 7-day streak | +150 |
 
-Levels: Физик (0) → Механик (200) → Учёный (500) → Академик (1000) → Эйнштейн (2000)
+Levels: Физик (0) → Механик (200) → Учёный (500) → Академик (1000) → Эпштейн (2000)
 
 ## Contributing
 

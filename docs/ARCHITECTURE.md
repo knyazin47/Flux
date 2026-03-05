@@ -165,7 +165,7 @@ Levels:
   200  Механик
   500  Учёный
   1000 Академик
-  2000 Эйнштейн
+  2000 Эпштейн
 ```
 
 Achievements: `first_task`, `streak_7`, `answers_100`, `all_topics`, `perfect`

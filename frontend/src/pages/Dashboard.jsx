@@ -31,7 +31,7 @@ const LEVELS = [
   { name: "Механик",  min: 200,  max: 500  },
   { name: "Учёный",   min: 500,  max: 1000 },
   { name: "Академик", min: 1000, max: 2000 },
-  { name: "Эйнштейн", min: 2000, max: 3500 },
+  { name: "Эпштейн",  min: 2000, max: 3500 },
 ];
 
 function getLevel(xp) {

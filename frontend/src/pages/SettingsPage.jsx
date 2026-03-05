@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
 import { X, ChevronRight } from "lucide-react";
+import { APP_VERSION } from "@/version";
 
 function Modal({ title, children, onClose }) {
   return (
@@ -128,7 +129,7 @@ export default function SettingsPage() {
         <SettingRow left="🗑️ Сбросить весь прогресс" right={null} onClick={() => setModal("reset")} red />
       </Card>
 
-      <p className="text-xs text-center mt-4 pb-4" style={{ color: "var(--muted)" }}>Физика • Версия 1.0.0</p>
+      <p className="text-xs text-center mt-4 pb-4" style={{ color: "var(--muted)" }}>Физика • v{APP_VERSION}</p>
     </div>
   );
 }

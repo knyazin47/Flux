@@ -101,10 +101,6 @@ function FlipCard({ formula, starred, onStar, onRate, index, total }) {
 
   return (
     <div className="flex flex-col items-center gap-4 px-4 flex-1">
-      <p className="text-xs" style={{ color: "var(--muted)" }}>
-        ← Не знаю &nbsp;&nbsp;|&nbsp;&nbsp; Знаю →
-      </p>
-
       {/* Карточка */}
       <div className="w-full flex-1 max-h-72" style={{ perspective: 1000 }}
         onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -279,6 +275,7 @@ export default function FormulaCards() {
         </div>
         {cards[cardIndex] && (
           <FlipCard
+            key={cardIndex}
             formula={cards[cardIndex]}
             starred={starred.includes(cards[cardIndex].id)}
             onStar={toggleStar}

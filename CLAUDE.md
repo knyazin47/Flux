@@ -104,6 +104,6 @@ Tailwind is used for layout/spacing; component colors use `style={{ color: "var(
 
 ```
 XP rewards: correct answer +10, daily goal +50, mock exam +100, streak 7 days +150
-Levels: Физик(0) → Механик(200) → Учёный(500) → Академик(1000) → Эйнштейн(2000)
+Levels: Физик(0) → Механик(200) → Учёный(500) → Академик(1000) → Эпштейн(2000)
 Achievements: first_task, streak_7, answers_100, all_topics, perfect
 ```

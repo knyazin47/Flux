@@ -73,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
             }}
           >
             <span className="text-base font-bold" style={{ color: "var(--text)" }}>
-              ⚛️ Физика
+              Физика
             </span>
             <div className="flex items-center gap-2">
               <Link

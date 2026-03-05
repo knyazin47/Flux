@@ -47,7 +47,7 @@ function loadWeekData() {
   }
 }
 
-const TABS = ["Статистика", "Темы", "РТ/ДРТ", "🏆"];
+const TABS = ["Статистика", "Темы", "РТ/ДРТ", "Достижения"];
 
 function AddResultModal({ onClose, onSave }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -227,7 +227,7 @@ export default function Progress() {
       )}
 
       {/* TAB 4 */}
-      {tab === "🏆" && (
+      {tab === "Достижения" && (
         <>
           <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Достижения</p>
           <div className="grid grid-cols-3 gap-3">
