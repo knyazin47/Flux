@@ -131,4 +131,4 @@ See [PLAN.md](PLAN.md) for the phased technical roadmap.
 
 ## License
 
-[MIT](LICENSE.txt)
+[MIT](LICENCE.txt)
