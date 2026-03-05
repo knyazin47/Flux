@@ -5,6 +5,14 @@ import { X, ChevronRight } from "lucide-react";
 import { APP_VERSION } from "@/version";
 import { CACHE_TS_KEY } from "@/utils/generateQuestions";
 
+const SYNC_KEYS = [
+  "streak_days", "streak_last_date",
+  "xp_total", "today_xp", "today_done",
+  "daily_goal", "topic_stats", "achievements",
+  "rt_results", "exam_date", "exam_type",
+  "onboarding_complete",
+];
+
 function formatQuestionsTs(iso) {
   if (!iso) return "нет данных";
   const d = new Date(iso);
@@ -44,8 +52,79 @@ export default function SettingsPage() {
   const [dailyGoal, setDailyGoal] = useState(localStorage.getItem("daily_goal") || "10");
   const [notif, setNotif] = useState(localStorage.getItem("notif_enabled") === "true");
   const [notifTime, setNotifTime] = useState(localStorage.getItem("notif_time") || "20:00");
-  const [modal, setModal] = useState(null); // reset | time
+  const [modal, setModal] = useState(null); // reset | time | sync-save | sync-load
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncCode, setSyncCode] = useState("");
+  const [syncCodeInput, setSyncCodeInput] = useState("");
+  const [syncError, setSyncError] = useState("");
+  const [syncSuccess, setSyncSuccess] = useState(false);
   const questionsUpdatedAt = formatQuestionsTs(localStorage.getItem(CACHE_TS_KEY));
+
+  const resetSync = () => {
+    setModal(null);
+    setSyncLoading(false);
+    setSyncCode("");
+    setSyncCodeInput("");
+    setSyncError("");
+    setSyncSuccess(false);
+  };
+
+  const handleSyncSave = async () => {
+    setSyncLoading(true);
+    setSyncError("");
+    try {
+      const data = {};
+      SYNC_KEYS.forEach((key) => {
+        const val = localStorage.getItem(key);
+        if (val !== null) data[key] = val;
+      });
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save", data }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      setSyncCode(json.code);
+    } catch (e) {
+      setSyncError(
+        e.message === "not_configured"
+          ? "Синхронизация не настроена на сервере"
+          : "Не удалось создать код. Проверь интернет."
+      );
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
+  const handleSyncLoad = async () => {
+    setSyncLoading(true);
+    setSyncError("");
+    try {
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "load", code: syncCodeInput }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          json.error === "not_found"
+            ? "Код не найден или истёк"
+            : "Ошибка загрузки данных"
+        );
+      }
+      Object.entries(json.data).forEach(([key, value]) =>
+        localStorage.setItem(key, value)
+      );
+      setSyncSuccess(true);
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (e) {
+      setSyncError(e.message);
+    } finally {
+      setSyncLoading(false);
+    }
+  };
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -77,6 +156,73 @@ export default function SettingsPage() {
             <button onClick={() => setModal(null)} className="flex-1 py-3 rounded-2xl text-sm font-semibold border" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>Отмена</button>
             <button onClick={handleReset} className="flex-1 py-3 rounded-2xl text-sm font-bold text-white" style={{ background: "#EF4444" }}>Сбросить</button>
           </div>
+        </Modal>
+      )}
+
+      {modal === "sync-save" && (
+        <Modal title="Создать код синхронизации" onClose={resetSync}>
+          {!syncCode ? (
+            <>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                Получите 6-значный код и введите его на другом устройстве чтобы перенести прогресс. Код действует 30 дней.
+              </p>
+              {syncError && <p className="text-sm text-red-500">{syncError}</p>}
+              <button
+                onClick={handleSyncSave}
+                disabled={syncLoading}
+                className="w-full py-3 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
+                style={{ background: "#F97316" }}>
+                {syncLoading ? "Создание..." : "Создать код"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-center" style={{ color: "var(--muted)" }}>Ваш код синхронизации:</p>
+              <p className="text-4xl font-bold text-center py-2" style={{ color: "var(--text)", letterSpacing: "0.3em" }}>
+                {syncCode}
+              </p>
+              <p className="text-xs text-center" style={{ color: "var(--muted)" }}>Действует 30 дней</p>
+              <button
+                onClick={() => navigator.clipboard?.writeText(syncCode)}
+                className="w-full py-3 rounded-2xl text-sm font-bold text-white"
+                style={{ background: "#F97316" }}>
+                Скопировать код
+              </button>
+            </>
+          )}
+        </Modal>
+      )}
+
+      {modal === "sync-load" && (
+        <Modal title="Восстановить прогресс" onClose={resetSync}>
+          {syncSuccess ? (
+            <p className="text-sm text-center py-2" style={{ color: "#22C55E" }}>Прогресс восстановлен. Перезагрузка...</p>
+          ) : (
+            <>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                Введите 6-значный код с другого устройства.
+              </p>
+              <input
+                value={syncCodeInput}
+                onChange={(e) => setSyncCodeInput(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))}
+                maxLength={6}
+                placeholder="A3F7K2"
+                className="w-full px-4 py-3 rounded-xl text-2xl font-bold text-center tracking-widest outline-none uppercase"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", letterSpacing: "0.3em" }}
+              />
+              {syncError && <p className="text-sm text-red-500">{syncError}</p>}
+              <div className="flex gap-3">
+                <button onClick={resetSync} className="flex-1 py-3 rounded-2xl text-sm font-semibold border" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>Отмена</button>
+                <button
+                  onClick={handleSyncLoad}
+                  disabled={syncLoading || syncCodeInput.length < 6}
+                  className="flex-1 py-3 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
+                  style={{ background: "#F97316" }}>
+                  {syncLoading ? "Загрузка..." : "Восстановить"}
+                </button>
+              </div>
+            </>
+          )}
         </Modal>
       )}
 
@@ -129,6 +275,13 @@ export default function SettingsPage() {
         {notif && (
           <SettingRow left="⏰ Время" right={<>{notifTime}<ChevronRight size={14} /></>} onClick={() => setModal("time")} />
         )}
+      </Card>
+
+      {/* Синхронизация */}
+      <SectionHeader label="СИНХРОНИЗАЦИЯ" />
+      <Card className="!py-0 !px-4">
+        <SettingRow left="Создать код синхронизации" right={<ChevronRight size={14} />} onClick={() => setModal("sync-save")} />
+        <SettingRow left="Восстановить по коду" right={<ChevronRight size={14} />} onClick={() => setModal("sync-load")} />
       </Card>
 
       {/* Вопросы */}
