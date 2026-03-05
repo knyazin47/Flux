@@ -102,10 +102,12 @@ export default function Progress() {
   const topicStats = loadTopicStats();
   const weekData = loadWeekData();
 
-  const totalXP = parseInt(localStorage.getItem("total_xp") || "0");
-  const streak = parseInt(localStorage.getItem("streak") || "0");
-  const totalAnswers = parseInt(localStorage.getItem("total_answers") || "0");
-  const accuracy = totalAnswers > 0 ? Math.round((parseInt(localStorage.getItem("correct_answers") || "0") / totalAnswers) * 100) : 0;
+  const totalXP = parseInt(localStorage.getItem("xp_total") || "0");
+  const streak = parseInt(localStorage.getItem("streak_days") || "0");
+  const topicRaw = (() => { try { return JSON.parse(localStorage.getItem("topic_stats") || "{}"); } catch { return {}; } })();
+  const totalAnswers = Object.values(topicRaw).reduce((s, t) => s + (t.total || 0), 0);
+  const totalCorrect = Object.values(topicRaw).reduce((s, t) => s + (t.correct || 0), 0);
+  const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
 
   const maxBar = Math.max(...weekData, 1);
 

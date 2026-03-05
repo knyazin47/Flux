@@ -56,6 +56,7 @@ import SettingsPage from './pages/SettingsPage';
 import Theory from './pages/Theory';
 import MockExam from './pages/MockExam';
 import FormulaCards from './pages/FormulaCards';
+import ActiveSessions from './pages/ActiveSessions';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +70,7 @@ export const PAGES = {
     "Theory": Theory,
     "MockExam": MockExam,
     "FormulaCards": FormulaCards,
+    "ActiveSessions": ActiveSessions,
 }
 
 export const pagesConfig = {

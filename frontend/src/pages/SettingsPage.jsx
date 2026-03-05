@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 function Modal({ title, children, onClose }) {
   return (

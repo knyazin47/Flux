@@ -46,26 +46,8 @@ export default function Theory() {
   const [loadError,     setLoadError]     = useState(null);
   const [confirmExit,   setConfirmExit]   = useState(false);
   const [timedOut,      setTimedOut]      = useState(false);
+  const [resumeModal,   setResumeModal]   = useState(() => !!localStorage.getItem("theory_session"));
   const timerRef = useRef(null);
-
-  // Auto-resume saved session on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("theory_session");
-    if (saved) {
-      try {
-        const s = JSON.parse(saved);
-        setSessionQ(s.sessionQ);
-        setQIndex(s.qIndex);
-        setAnswers(s.answers || []);
-        setTimerDuration(s.timerDuration || 0);
-        setSelectedTopic(s.selectedTopic || "Все темы");
-        setMode(s.mode || "topic");
-        setSelected(null);
-        setTimeLeft(s.timerDuration || 0);
-        setView("question");
-      } catch {}
-    }
-  }, []);
 
   // Timer
   useEffect(() => {
@@ -80,40 +62,54 @@ export default function Theory() {
     return () => clearInterval(timerRef.current);
   }, [view, qIndex, timerDuration]);
 
-  // Handle timer expiry with fresh state
   useEffect(() => {
     if (timedOut) { setTimedOut(false); handleNext(true); }
   }, [timedOut]); // eslint-disable-line
 
-  const saveSession = () => {
-    localStorage.setItem("theory_session", JSON.stringify({
-      sessionQ, qIndex, answers, timerDuration, selectedTopic, mode,
-    }));
+  const saveSessionSnapshot = (overrides = {}) => {
+    const base = {
+      sessionQ,
+      qIndex,
+      answers,
+      timerDuration,
+      selectedTopic,
+      mode,
+      currentSelected: selected,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem("theory_session", JSON.stringify({ ...base, ...overrides }));
   };
 
-  const handleExit = () => {
-    clearInterval(timerRef.current);
-    saveSession();
-    setSelected(null);
-    setView("start");
-    setConfirmExit(false);
-  };
-
-  const resumeSession = () => {
-    const saved = localStorage.getItem("theory_session");
-    if (!saved) return;
+  const continueSession = () => {
+    const raw = localStorage.getItem("theory_session");
+    if (!raw) { setResumeModal(false); return; }
     try {
-      const s = JSON.parse(saved);
+      const s = JSON.parse(raw);
       setSessionQ(s.sessionQ);
       setQIndex(s.qIndex);
       setAnswers(s.answers || []);
       setTimerDuration(s.timerDuration || 0);
       setSelectedTopic(s.selectedTopic || "Все темы");
       setMode(s.mode || "topic");
-      setSelected(null);
+      setSelected(s.currentSelected ?? null);
       setTimeLeft(s.timerDuration || 0);
       setView("question");
     } catch {}
+    setResumeModal(false);
+  };
+
+  const restartSession = () => {
+    localStorage.removeItem("theory_session");
+    setResumeModal(false);
+  };
+
+  const handleExit = () => {
+    clearInterval(timerRef.current);
+    saveSessionSnapshot();
+    setSelected(null);
+    setView("start");
+    setConfirmExit(false);
+    setResumeModal(true);
   };
 
   const start = async () => {
@@ -143,6 +139,7 @@ export default function Theory() {
     if (selected !== null) return;
     setSelected(idx);
     clearInterval(timerRef.current);
+    saveSessionSnapshot({ currentSelected: idx });
   };
 
   const handleNext = (timeout = false) => {
@@ -150,22 +147,27 @@ export default function Theory() {
     const correct = !timeout && selected === q.correct;
     const newAnswers = [...answers, { correct, topic: q.topic }];
     const isLast = qIndex + 1 >= sessionQ.length;
+    const nextIndex = qIndex + 1;
+
+    if (!isLast) {
+      saveSessionSnapshot({ qIndex: nextIndex, answers: newAnswers, currentSelected: null });
+    }
 
     const proceed = () => {
       setAnswers(newAnswers);
       if (isLast) {
         localStorage.removeItem("theory_session");
         const byTopic = {};
-        newAnswers.forEach(({ topic, correct }) => {
+        newAnswers.forEach(({ topic, correct: c }) => {
           if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
           byTopic[topic].total += 1;
-          if (correct) byTopic[topic].correct += 1;
+          if (c) byTopic[topic].correct += 1;
         });
-        Object.entries(byTopic).forEach(([topic, { correct, total }]) => updateTopicStats(topic, correct, total));
+        Object.entries(byTopic).forEach(([topic, { correct: c, total }]) => updateTopicStats(topic, c, total));
         checkAchievements();
         setView("finished");
       } else {
-        setQIndex((i) => i + 1);
+        setQIndex(nextIndex);
       }
     };
 
@@ -185,6 +187,29 @@ export default function Theory() {
     if (!answers[i]?.correct) acc[q.topic] = (acc[q.topic] || 0) + 1;
     return acc;
   }, {});
+
+  const ResumeModal = resumeModal ? (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+      <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
+        <div>
+          <p className="font-bold text-base" style={{ color: "var(--text)" }}>Незавершённый тест по теории</p>
+          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>Продолжить с того места или начать заново?</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <button onClick={continueSession}
+            className="w-full py-3 rounded-xl text-sm font-bold text-white"
+            style={{ background: "#F97316" }}>
+            ▶ Продолжить
+          </button>
+          <button onClick={restartSession}
+            className="w-full py-3 rounded-xl text-sm font-semibold border"
+            style={{ borderColor: "var(--border)", color: "var(--muted)", background: "var(--card)" }}>
+            Начать заново
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   // ── Загрузка ─────────────────────────────────────────────────────────────────
   if (view === "loading") return (
@@ -284,18 +309,22 @@ export default function Theory() {
                 if (idx === q.correct)     { bg = "#F0FDF4"; border = "#22C55E"; color = "#15803D"; icon = "check"; }
                 else if (idx === selected) { bg = "#FEF2F2"; border = "#EF4444"; color = "#B91C1C"; icon = "wrong"; }
               }
+              const text = opt.replace(/^[АБВГД][:.]\s*/u, "");
               return (
                 <button key={idx} onClick={() => handleSelect(idx)}
-                  className="w-full min-h-[3.5rem] h-auto flex items-start justify-between gap-2 px-4 py-3.5 rounded-2xl text-left text-base transition-all duration-200"
+                  className="w-full min-h-[3.5rem] h-auto relative flex items-center px-4 py-3.5 rounded-2xl text-base transition-all duration-200"
                   style={{ background: bg, border: `1.5px solid ${border}`, color }}>
-                  <span className="leading-snug"><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt.replace(/^[АБВГД][:.]\s*/u, "")}</span>
+                  <span className="w-full text-center leading-snug pr-8"
+                    style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
+                    <span className="font-semibold">{LABELS[idx]})</span>{" "}{text}
+                  </span>
                   {icon === "check" && (
-                    <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
+                    <span className="absolute right-3 w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
                       <Check size={14} color="white" strokeWidth={2.5} />
                     </span>
                   )}
                   {icon === "wrong" && (
-                    <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EF4444" }}>
+                    <span className="absolute right-3 w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EF4444" }}>
                       <X size={14} color="white" strokeWidth={2.5} />
                     </span>
                   )}
@@ -329,7 +358,6 @@ export default function Theory() {
           </div>
         </div>
 
-        {/* Sticky next button above bottom nav */}
         <div style={{
           position: "fixed",
           bottom: 64,
@@ -350,88 +378,76 @@ export default function Theory() {
   }
 
   // ── Стартовый экран ──────────────────────────────────────────────────────────
-  const hasSaved = !!localStorage.getItem("theory_session");
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Теория</h1>
+    <>
+      {ResumeModal}
+      <div className="flex flex-col gap-4 p-4">
+        <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Теория</h1>
 
-      {loadError && (
-        <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: "#FEF2F2", color: "#B91C1C" }}>
-          {loadError}
-        </div>
-      )}
-
-      {hasSaved && (
-        <button onClick={resumeSession} className="w-full text-left rounded-2xl p-4 flex items-center gap-3"
-          style={{ background: "#FFF7ED", border: "2px solid #F97316" }}>
-          <span className="text-2xl">▶️</span>
-          <div>
-            <p className="text-sm font-bold" style={{ color: "#F97316" }}>Незавершённый тест</p>
-            <p className="text-xs mt-0.5" style={{ color: "#C2410C" }}>Нажми, чтобы продолжить</p>
-          </div>
-        </button>
-      )}
-
-      {/* Выбор темы */}
-      <div className="relative">
-        <button onClick={() => setTopicOpen((o) => !o)}
-          className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium"
-          style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--text)" }}>
-          {selectedTopic}
-          <ChevronDown size={16} style={{ color: "var(--muted)" }} />
-        </button>
-        {topicOpen && (
-          <div className="absolute top-full left-0 right-0 mt-1 rounded-2xl overflow-hidden z-20 shadow-xl"
-            style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            {TOPICS_LIST.map((t) => (
-              <button key={t} onClick={() => { setSelectedTopic(t); setTopicOpen(false); }}
-                className="w-full text-left px-4 py-3 text-sm border-b last:border-0 transition-colors"
-                style={{
-                  borderColor: "var(--border)",
-                  color: t === selectedTopic ? "#F97316" : "var(--text)",
-                  background: t === selectedTopic ? "#FFF7ED" : "var(--card)",
-                }}>
-                {t}
-              </button>
-            ))}
+        {loadError && (
+          <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: "#FEF2F2", color: "#B91C1C" }}>
+            {loadError}
           </div>
         )}
-      </div>
 
-      {/* Режим */}
-      <div className="flex gap-2">
-        {[{ id: "topic", label: "📚 По теме" }, { id: "random", label: "🎲 Случайные" }].map((m) => (
-          <button key={m.id} onClick={() => setMode(m.id)}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-            style={{
-              background: mode === m.id ? "#F97316" : "var(--card)",
-              color: mode === m.id ? "#fff" : "var(--muted)",
-              border: `1px solid ${mode === m.id ? "#F97316" : "var(--border)"}`,
-            }}>
-            {m.label}
+        <div className="relative">
+          <button onClick={() => setTopicOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium"
+            style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--text)" }}>
+            {selectedTopic}
+            <ChevronDown size={16} style={{ color: "var(--muted)" }} />
           </button>
-        ))}
-      </div>
+          {topicOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-2xl overflow-hidden z-20 shadow-xl"
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+              {TOPICS_LIST.map((t) => (
+                <button key={t} onClick={() => { setSelectedTopic(t); setTopicOpen(false); }}
+                  className="w-full text-left px-4 py-3 text-sm border-b last:border-0 transition-colors"
+                  style={{
+                    borderColor: "var(--border)",
+                    color: t === selectedTopic ? "#F97316" : "var(--text)",
+                    background: t === selectedTopic ? "#FFF7ED" : "var(--card)",
+                  }}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Таймер */}
-      <div className="flex flex-col gap-2">
-        <p className="text-sm px-1" style={{ color: "var(--muted)" }}>⏱ Таймер на вопрос</p>
-        <div className="flex gap-1.5">
-          {TIMER_OPTIONS.map((opt) => (
-            <button key={opt.value} onClick={() => setTimerDuration(opt.value)}
-              className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+        <div className="flex gap-2">
+          {[{ id: "topic", label: "📚 По теме" }, { id: "random", label: "🎲 Случайные" }].map((m) => (
+            <button key={m.id} onClick={() => setMode(m.id)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{
-                background: timerDuration === opt.value ? "#F97316" : "var(--card)",
-                color: timerDuration === opt.value ? "#fff" : "var(--muted)",
-                border: `1px solid ${timerDuration === opt.value ? "#F97316" : "var(--border)"}`,
+                background: mode === m.id ? "#F97316" : "var(--card)",
+                color: mode === m.id ? "#fff" : "var(--muted)",
+                border: `1px solid ${mode === m.id ? "#F97316" : "var(--border)"}`,
               }}>
-              {opt.label}
+              {m.label}
             </button>
           ))}
         </div>
-      </div>
 
-      <OrangeButton onClick={start}>Начать →</OrangeButton>
-    </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm px-1" style={{ color: "var(--muted)" }}>⏱ Таймер на вопрос</p>
+          <div className="flex gap-1.5">
+            {TIMER_OPTIONS.map((opt) => (
+              <button key={opt.value} onClick={() => setTimerDuration(opt.value)}
+                className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                style={{
+                  background: timerDuration === opt.value ? "#F97316" : "var(--card)",
+                  color: timerDuration === opt.value ? "#fff" : "var(--muted)",
+                  border: `1px solid ${timerDuration === opt.value ? "#F97316" : "var(--border)"}`,
+                }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <OrangeButton onClick={start}>Начать →</OrangeButton>
+      </div>
+    </>
   );
 }

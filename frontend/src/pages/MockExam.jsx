@@ -23,8 +23,34 @@ function formatTime(s) {
     : `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
+function saveExamSession(data) {
+  try {
+    localStorage.setItem("exam_session", JSON.stringify({
+      ...data,
+      flagged: [...data.flagged],
+      selectedTopics: [...data.selectedTopics],
+      savedAt: new Date().toISOString(),
+    }));
+  } catch {}
+}
+
+function loadExamSession() {
+  try {
+    const raw = localStorage.getItem("exam_session");
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return {
+      ...s,
+      flagged: new Set(s.flagged || []),
+      selectedTopics: new Set(s.selectedTopics || TOPICS),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function MockExam() {
-  const [view, setView] = useState("format"); // format | exam | results
+  const [view, setView] = useState("format");
   const [format, setFormat] = useState("full");
   const [selectedTopics, setSelectedTopics] = useState(new Set(TOPICS));
   const [questions, setQuestions] = useState([]);
@@ -36,6 +62,7 @@ export default function MockExam() {
   const [showErrors, setShowErrors] = useState(false);
   const [saveModal, setSaveModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resumeModal, setResumeModal] = useState(() => !!localStorage.getItem("exam_session"));
   const timerRef = useRef(null);
 
   const fullQ = 30, miniQ = 10;
@@ -52,6 +79,7 @@ export default function MockExam() {
 
   const startExam = async () => {
     setLoading(true);
+    localStorage.removeItem("exam_session");
     try {
       const perTopic = Math.ceil(totalQ / selectedTopics.size);
       const batches = await Promise.all(
@@ -64,17 +92,44 @@ export default function MockExam() {
       setFlagged(new Set());
       setTimeLeft(totalTime);
       setView("exam");
-      timerRef.current = setInterval(() => setTimeLeft(t => { if (t <= 1) { clearInterval(timerRef.current); setView("results"); return 0; } return t - 1; }), 1000);
+      timerRef.current = setInterval(() => setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current); setView("results"); return 0; }
+        return t - 1;
+      }), 1000);
     } finally {
       setLoading(false);
     }
   };
 
+  const continueSession = () => {
+    const s = loadExamSession();
+    if (!s) { setResumeModal(false); return; }
+    setQuestions(s.questions);
+    setQIndex(s.qIndex || 0);
+    setUserAnswers(s.userAnswers || {});
+    setFlagged(s.flagged);
+    setFormat(s.format || "full");
+    setSelectedTopics(s.selectedTopics);
+    setTimeLeft(s.timeLeft || 0);
+    setView("exam");
+    setResumeModal(false);
+    timerRef.current = setInterval(() => setTimeLeft(t => {
+      if (t <= 1) { clearInterval(timerRef.current); setView("results"); return 0; }
+      return t - 1;
+    }), 1000);
+  };
+
+  const restartSession = () => {
+    localStorage.removeItem("exam_session");
+    setResumeModal(false);
+  };
+
   useEffect(() => () => clearInterval(timerRef.current), []);
 
-  // Сохраняем topic_stats когда экзамен заканчивается (таймер или последний вопрос)
+  // Persist stats on results
   useEffect(() => {
     if (view !== "results" || questions.length === 0) return;
+    localStorage.removeItem("exam_session");
     try {
       const stats = JSON.parse(localStorage.getItem("topic_stats") || "{}");
       questions.forEach((q, i) => {
@@ -89,7 +144,9 @@ export default function MockExam() {
 
   const handleAnswer = (idx) => {
     if (userAnswers[qIndex] !== undefined) return;
-    setUserAnswers(prev => ({ ...prev, [qIndex]: idx }));
+    const newAnswers = { ...userAnswers, [qIndex]: idx };
+    setUserAnswers(newAnswers);
+    saveExamSession({ questions, qIndex, userAnswers: newAnswers, flagged, format, selectedTopics, timeLeft });
     setTimeout(() => {
       if (qIndex + 1 < questions.length) setQIndex(i => i + 1);
       else { clearInterval(timerRef.current); setView("results"); }
@@ -97,7 +154,12 @@ export default function MockExam() {
   };
 
   const toggleFlag = () => {
-    setFlagged(prev => { const n = new Set(prev); n.has(qIndex) ? n.delete(qIndex) : n.add(qIndex); return n; });
+    setFlagged(prev => {
+      const n = new Set(prev);
+      n.has(qIndex) ? n.delete(qIndex) : n.add(qIndex);
+      saveExamSession({ questions, qIndex, userAnswers, flagged: n, format, selectedTopics, timeLeft });
+      return n;
+    });
   };
 
   const correctCount = questions.filter((q, i) => userAnswers[i] === q.correct).length;
@@ -107,7 +169,7 @@ export default function MockExam() {
 
   const topicResults = TOPICS.map(t => {
     const tqs = questions.filter(q => q.topic === t);
-    const correct = tqs.filter((q, i) => {
+    const correct = tqs.filter(q => {
       const qi = questions.indexOf(q);
       return userAnswers[qi] === q.correct;
     }).length;
@@ -117,56 +179,82 @@ export default function MockExam() {
   const flaggedQuestions = [...flagged].map(i => ({ index: i, q: questions[i] })).filter(f => f.q);
   const wrongQuestions = questions.map((q, i) => ({ i, q })).filter(({ i, q }) => userAnswers[i] !== undefined && userAnswers[i] !== q.correct);
 
-  // VIEW A
-  if (view === "format") return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Пробный экзамен</h1>
-
-      <div className="flex flex-col gap-3">
-        {[
-          { id: "full", emoji: "🎯", title: "Полный тест", sub: "30 вопросов • 90 минут", sub2: "Все темы физики" },
-          { id: "mini", emoji: "⚡", title: "Мини-тест", sub: "10 вопросов • 30 минут", sub2: "Быстрая проверка" },
-        ].map(f => (
-          <Card key={f.id} onClick={() => setFormat(f.id)}
-            style={{ border: `2px solid ${format === f.id ? "#F97316" : "var(--border)"}`, background: format === f.id ? "#FFF7ED" : "var(--card)" }}>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">{f.emoji}</span>
-              <div>
-                <p className="font-semibold" style={{ color: "var(--text)" }}>{f.title}</p>
-                <p className="text-sm mt-0.5" style={{ color: "var(--muted)" }}>{f.sub}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>{f.sub2}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-sm" style={{ color: "var(--muted)" }}>Выбрать темы:</p>
-          <div className="flex gap-3">
-            <button onClick={() => setSelectedTopics(new Set(TOPICS))} className="text-xs font-semibold" style={{ color: "#F97316" }}>Выбрать все</button>
-            <button onClick={() => setSelectedTopics(new Set())} className="text-xs font-semibold" style={{ color: "var(--muted)" }}>Снять все</button>
-          </div>
+  const ResumeModal = resumeModal ? (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+      <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
+        <div>
+          <p className="font-bold text-base" style={{ color: "var(--text)" }}>Незавершённый экзамен</p>
+          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>Продолжить с того места или начать заново?</p>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {TOPICS.map(t => (
-            <button key={t} onClick={() => toggleTopic(t)}
-              className="py-2 px-2 rounded-xl text-[11px] font-semibold text-center transition-all"
-              style={{ background: selectedTopics.has(t) ? "#F97316" : "var(--card)", color: selectedTopics.has(t) ? "#fff" : "var(--muted)", border: `1px solid ${selectedTopics.has(t) ? "#F97316" : "var(--border)"}` }}>
-              {t}
-            </button>
+        <div className="flex flex-col gap-2">
+          <button onClick={continueSession}
+            className="w-full py-3 rounded-xl text-sm font-bold text-white"
+            style={{ background: "#F97316" }}>
+            ▶ Продолжить
+          </button>
+          <button onClick={restartSession}
+            className="w-full py-3 rounded-xl text-sm font-semibold border"
+            style={{ borderColor: "var(--border)", color: "var(--muted)", background: "var(--card)" }}>
+            Начать заново
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  // VIEW A — format selection
+  if (view === "format") return (
+    <>
+      {ResumeModal}
+      <div className="flex flex-col gap-4 p-4">
+        <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Пробный экзамен</h1>
+
+        <div className="flex flex-col gap-3">
+          {[
+            { id: "full", emoji: "🎯", title: "Полный тест", sub: "30 вопросов • 90 минут", sub2: "Все темы физики" },
+            { id: "mini", emoji: "⚡", title: "Мини-тест", sub: "10 вопросов • 30 минут", sub2: "Быстрая проверка" },
+          ].map(f => (
+            <Card key={f.id} onClick={() => setFormat(f.id)}
+              style={{ border: `2px solid ${format === f.id ? "#F97316" : "var(--border)"}`, background: format === f.id ? "#FFF7ED" : "var(--card)" }}>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">{f.emoji}</span>
+                <div>
+                  <p className="font-semibold" style={{ color: "var(--text)" }}>{f.title}</p>
+                  <p className="text-sm mt-0.5" style={{ color: "var(--muted)" }}>{f.sub}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>{f.sub2}</p>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
-      </div>
 
-      <OrangeButton onClick={startExam} disabled={selectedTopics.size === 0 || loading}>
-        {loading ? "Загрузка вопросов..." : "Начать экзамен"}
-      </OrangeButton>
-    </div>
+        <div>
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-sm" style={{ color: "var(--muted)" }}>Выбрать темы:</p>
+            <div className="flex gap-3">
+              <button onClick={() => setSelectedTopics(new Set(TOPICS))} className="text-xs font-semibold" style={{ color: "#F97316" }}>Выбрать все</button>
+              <button onClick={() => setSelectedTopics(new Set())} className="text-xs font-semibold" style={{ color: "var(--muted)" }}>Снять все</button>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {TOPICS.map(t => (
+              <button key={t} onClick={() => toggleTopic(t)}
+                className="py-2 px-2 rounded-xl text-[11px] font-semibold text-center transition-all"
+                style={{ background: selectedTopics.has(t) ? "#F97316" : "var(--card)", color: selectedTopics.has(t) ? "#fff" : "var(--muted)", border: `1px solid ${selectedTopics.has(t) ? "#F97316" : "var(--border)"}` }}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <OrangeButton onClick={startExam} disabled={selectedTopics.size === 0 || loading}>
+          {loading ? "Загрузка вопросов..." : "Начать экзамен"}
+        </OrangeButton>
+      </div>
+    </>
   );
 
-  // VIEW B
+  // VIEW B — exam in progress
   if (view === "exam" && questions[qIndex]) {
     const q = questions[qIndex];
     const answered = userAnswers[qIndex] !== undefined;
@@ -176,10 +264,16 @@ export default function MockExam() {
           <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
             <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
               <p className="font-bold text-base" style={{ color: "var(--text)" }}>Выйти из экзамена?</p>
-              <p className="text-sm" style={{ color: "var(--muted)" }}>Вы уверены? Прогресс будет потерян.</p>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>Прогресс сохранится — можно будет продолжить.</p>
               <div className="flex gap-3">
                 <button onClick={() => setConfirmExit(false)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold border" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>Отмена</button>
-                <button onClick={() => { clearInterval(timerRef.current); setView("format"); }} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: "#EF4444" }}>Выйти</button>
+                <button onClick={() => {
+                  clearInterval(timerRef.current);
+                  saveExamSession({ questions, qIndex, userAnswers, flagged, format, selectedTopics, timeLeft });
+                  setView("format");
+                  setResumeModal(true);
+                  setConfirmExit(false);
+                }} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: "#F97316" }}>Сохранить и выйти</button>
               </div>
             </div>
           </div>
@@ -200,13 +294,23 @@ export default function MockExam() {
         <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
 
         <div className="flex flex-col gap-2">
-          {q.options.map((opt, idx) => (
-            <button key={idx} onClick={() => handleAnswer(idx)}
-              className="w-full h-14 flex items-center px-4 rounded-2xl text-left text-base transition-all"
-              style={{ background: "var(--card)", border: `1.5px solid ${answered && idx === userAnswers[qIndex] ? "#F97316" : "var(--border)"}`, color: "var(--text)" }}>
-              <span className="font-semibold mr-2">{LABELS[idx]})</span>{opt}
-            </button>
-          ))}
+          {q.options.map((opt, idx) => {
+            const text = opt.replace(/^[АБВГД][:.]\s*/u, "");
+            return (
+              <button key={idx} onClick={() => handleAnswer(idx)}
+                className="w-full min-h-[3.5rem] h-auto flex items-center justify-center px-4 py-3 rounded-2xl text-base transition-all"
+                style={{
+                  background: "var(--card)",
+                  border: `1.5px solid ${answered && idx === userAnswers[qIndex] ? "#F97316" : "var(--border)"}`,
+                  color: "var(--text)",
+                }}>
+                <span className="text-center leading-snug w-full"
+                  style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
+                  <span className="font-semibold">{LABELS[idx]})</span>{" "}{text}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex gap-3">
@@ -221,7 +325,6 @@ export default function MockExam() {
           </button>
         </div>
 
-        {/* Navigation dots */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {questions.map((_, i) => (
             <button key={i} onClick={() => setQIndex(i)}
@@ -239,7 +342,7 @@ export default function MockExam() {
     );
   }
 
-  // VIEW C
+  // VIEW C — results
   return (
     <div className="flex flex-col gap-4 p-4">
       {saveModal && (
@@ -306,7 +409,12 @@ export default function MockExam() {
           style={{ borderColor: "#F97316", color: "#F97316", background: "var(--card)" }}>
           {showErrors ? "Скрыть ошибки" : "Разбор ошибок"}
         </button>
-        <OrangeButton onClick={() => { const results = JSON.parse(localStorage.getItem("rt_results") || "[]"); results.unshift({ date: new Date().toISOString().slice(0, 10), type: format === "full" ? "Полный" : "Мини", score: pct, notes: `${correctCount}/${questions.length}` }); localStorage.setItem("rt_results", JSON.stringify(results)); setSaveModal(true); }}>
+        <OrangeButton onClick={() => {
+          const results = JSON.parse(localStorage.getItem("rt_results") || "[]");
+          results.unshift({ date: new Date().toISOString().slice(0, 10), type: format === "full" ? "Полный" : "Мини", score: pct, notes: `${correctCount}/${questions.length}` });
+          localStorage.setItem("rt_results", JSON.stringify(results));
+          setSaveModal(true);
+        }}>
           Сохранить результат
         </OrangeButton>
       </div>
