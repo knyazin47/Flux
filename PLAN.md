@@ -26,6 +26,9 @@
 - [x] Security: no hardcoded secrets, `.env.example` template
 - [x] Git hygiene: comprehensive `.gitignore`
 - [x] Professional README + `/docs` folder
+- [x] Semantic versioning (`src/version.js`), v1.3.0
+- [x] UI refinement: active-recall flashcard reset (`key={cardIndex}`), achievements tab label, level names
+- [x] **Rebranding to Flux**: app name, manifest, icons, all metadata updated (v1.4.0)
 
 ---
 

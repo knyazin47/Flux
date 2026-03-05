@@ -31,7 +31,7 @@ export default function Onboarding() {
         {/* TOP SECTION */}
         <div className="flex flex-col items-center gap-3 pt-4">
           <span style={{ fontSize: 64, lineHeight: 1 }}>⚛️📚🔥</span>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Физика ЦТ 2026</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Flux</h1>
           <p className="text-sm text-gray-400">Подготовка к экзамену • 5 июня 2026</p>
         </div>
 

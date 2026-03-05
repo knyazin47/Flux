@@ -20,7 +20,7 @@ No test suite is configured.
 
 ### Environment setup
 
-Create `frontend/.env.local`:
+Create `frontend/.env.local` (see `frontend/.env.example` for all variables):
 ```
 VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
@@ -40,20 +40,21 @@ node scripts/generate-daily.js
 ### Repository structure
 
 ```
-Physics/
-  frontend/          # React PWA (Vite + Base44 platform)
+flux/
+  frontend/          # React PWA (Vite)
   data/
     formulas.json    # Master formula database (all 9 topics, with LaTeX)
   scripts/
     generate-daily.js  # Node script called by GitHub Action
   formuls/           # Source PDF files (formula sheets, physics summaries)
+  docs/              # Architecture, development, contributing guides
   .github/workflows/
     main.yml         # Daily question generation workflow
 ```
 
 ### Frontend architecture
 
-The app is a **mobile-first PWA** (max-width 390px) built on the [Base44](https://base44.com) platform. Routing and auth are handled by `@base44/sdk`.
+The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6 with `src/pages.config.js`. Auth is a no-op stub (`src/lib/AuthContext.jsx`) — the app is fully local with no backend.
 
 **Routing:** `src/pages.config.js` registers all pages and the shared `Layout`. Routes are auto-derived from page names via `createPageUrl()` in `src/utils/index.ts`. The Onboarding page bypasses the Layout (no nav).
 

@@ -11,8 +11,8 @@
 ## Local Setup
 
 ```bash
-git clone https://github.com/your-org/physics-cte-2026.git
-cd physics-cte-2026/frontend
+git clone https://github.com/your-org/flux.git
+cd flux/frontend
 npm install
 cp .env.example .env.local
 ```
@@ -20,8 +20,8 @@ cp .env.example .env.local
 Edit `frontend/.env.local`:
 
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+VITE_BASE44_APP_ID=your_app_id          # legacy SDK compat, leave blank for local-only
+VITE_BASE44_APP_BASE_URL=https://your-app.base44.app  # same
 ```
 
 Start the dev server:

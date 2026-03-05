@@ -1,4 +1,4 @@
-# Физика ЦТ/ЦЭ 2026
+# Flux
 
 > Mobile-first PWA for Belarus physics exam preparation (ЦТ/ЦЭ 2026).
 
@@ -44,8 +44,8 @@
 ### Setup
 
 ```bash
-git clone https://github.com/your-org/physics-cte-2026.git
-cd physics-cte-2026/frontend
+git clone https://github.com/your-org/flux.git
+cd flux/frontend
 npm install
 cp .env.example .env.local
 # Edit .env.local — see .env.example for details
@@ -106,7 +106,7 @@ All commands run from `frontend/`:
 | `npm run lint:fix` | ESLint with auto-fix |
 | `npm run typecheck` | TypeScript type check |
 
-## Physics Topics
+## Subject Topics
 
 Механика · Молекулярная физика · Термодинамика · Электростатика · Постоянный ток · Электромагнетизм · Колебания и волны · Оптика · Квантовая и ядерная физика
 

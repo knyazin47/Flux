@@ -21,7 +21,7 @@ frontend/
       AuthContext.jsx  # No-op auth stub (kept for structural compatibility)
       PageNotFound.jsx # 404 page
     api/
-      base44Client.js  # No-op API stub
+      base44Client.js  # No-op API stub (legacy compat, no SDK calls made)
     Layout.jsx         # App shell: header, bottom nav, theme, session badge
     pages.config.js    # Page registry (name → component mapping)
   public/

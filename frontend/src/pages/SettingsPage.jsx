@@ -129,7 +129,7 @@ export default function SettingsPage() {
         <SettingRow left="🗑️ Сбросить весь прогресс" right={null} onClick={() => setModal("reset")} red />
       </Card>
 
-      <p className="text-xs text-center mt-4 pb-4" style={{ color: "var(--muted)" }}>Физика • v{APP_VERSION}</p>
+      <p className="text-xs text-center mt-4 pb-4" style={{ color: "var(--muted)" }}>Flux • v{APP_VERSION}</p>
     </div>
   );
 }
