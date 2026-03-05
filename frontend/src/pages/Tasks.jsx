@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import Card from "@/components/ui/Card";
-import TopicBadge from "@/components/ui/TopicBadge";
 import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { ArrowLeft, Star, Check, X } from "lucide-react";
@@ -111,34 +110,33 @@ export default function Tasks() {
     const wasCorrect = !timeout && selected === q.correct;
     const newAnswers = [...answers, { topic: q.topic, correct: wasCorrect }];
     setAnswers(newAnswers);
+    setSelected(null); // закрыть панель объяснения (анимация)
 
-    if (qIndex + 1 >= sessionQuestions.length) {
-      // Сессия завершена — записываем прогресс
-      const correctCount = newAnswers.filter((a) => a.correct).length;
-      const earned = correctCount * 10;
+    const isLast = qIndex + 1 >= sessionQuestions.length;
+    const nextIndex = qIndex + 1;
 
-      // XP и дневной прогресс
-      addXP(earned);
-      incrementTodayDone(sessionQuestions.length);
-
-      // Статистика по темам
-      const byTopic = {};
-      newAnswers.forEach(({ topic, correct }) => {
-        if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
-        byTopic[topic].total += 1;
-        if (correct) byTopic[topic].correct += 1;
-      });
-      Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
-        updateTopicStats(topic, correct, total);
-      });
-
-      checkAchievements();
-      setView("results");
-    } else {
-      setQIndex((i) => i + 1);
-      setSelected(null);
-      setTimeLeft(TIMER_START);
-    }
+    // Ждём завершения анимации закрытия (320мс), потом меняем вопрос
+    setTimeout(() => {
+      if (isLast) {
+        const correctCount = newAnswers.filter((a) => a.correct).length;
+        addXP(correctCount * 10);
+        incrementTodayDone(sessionQuestions.length);
+        const byTopic = {};
+        newAnswers.forEach(({ topic, correct }) => {
+          if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
+          byTopic[topic].total += 1;
+          if (correct) byTopic[topic].correct += 1;
+        });
+        Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
+          updateTopicStats(topic, correct, total);
+        });
+        checkAchievements();
+        setView("results");
+      } else {
+        setQIndex(nextIndex);
+        setTimeLeft(TIMER_START);
+      }
+    }, 320);
   };
 
   const formatTime = (s) =>
@@ -234,9 +232,10 @@ export default function Tasks() {
         <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>Вопрос {qIndex + 1} / {sessionQuestions.length}</p>
       </div>
 
-      <TopicBadge label={q.topic} />
-
       <Card>
+        <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: "#F97316" }}>
+          {q.topic}
+        </p>
         <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
       </Card>
 
