@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Card from "@/components/ui/Card";
 import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { ArrowLeft, ChevronDown, Star, Check, X } from "lucide-react";
+import { X, ChevronDown, Star, Check } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
@@ -14,36 +14,112 @@ function TeX({ formula }) {
 }
 
 const TOPICS_LIST = [
-  "Все темы",
-  "Механика",
-  "Молекулярная физика",
-  "Термодинамика",
-  "Электростатика",
-  "Постоянный ток",
-  "Электромагнетизм",
-  "Колебания и волны",
-  "Оптика",
-  "Квантовая и ядерная физика",
+  "Все темы", "Механика", "Молекулярная физика", "Термодинамика",
+  "Электростатика", "Постоянный ток", "Электромагнетизм",
+  "Колебания и волны", "Оптика", "Квантовая и ядерная физика",
 ];
-
 const LABELS = ["А", "Б", "В", "Г", "Д"];
 const SESSION_COUNT = 15;
+
+const TIMER_OPTIONS = [
+  { label: "Нет",   value: 0   },
+  { label: "30с",   value: 30  },
+  { label: "1 мин", value: 60  },
+  { label: "2 мин", value: 120 },
+  { label: "3 мин", value: 180 },
+];
+
+const formatTime = (s) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 export default function Theory() {
   const [selectedTopic, setSelectedTopic] = useState("Все темы");
   const [topicOpen,     setTopicOpen]     = useState(false);
   const [mode,          setMode]          = useState("topic");
-  const [view,          setView]          = useState("start"); // start | loading | question | finished
+  const [view,          setView]          = useState("start");
   const [qIndex,        setQIndex]        = useState(0);
   const [selected,      setSelected]      = useState(null);
-  const [score,         setScore]         = useState({ correct: 0, wrong: 0 });
   const [sessionQ,      setSessionQ]      = useState([]);
   const [answers,       setAnswers]       = useState([]);
+  const [timerDuration, setTimerDuration] = useState(0);
+  const [timeLeft,      setTimeLeft]      = useState(0);
   const [loadError,     setLoadError]     = useState(null);
+  const [confirmExit,   setConfirmExit]   = useState(false);
+  const [timedOut,      setTimedOut]      = useState(false);
+  const timerRef = useRef(null);
+
+  // Auto-resume saved session on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("theory_session");
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        setSessionQ(s.sessionQ);
+        setQIndex(s.qIndex);
+        setAnswers(s.answers || []);
+        setTimerDuration(s.timerDuration || 0);
+        setSelectedTopic(s.selectedTopic || "Все темы");
+        setMode(s.mode || "topic");
+        setSelected(null);
+        setTimeLeft(s.timerDuration || 0);
+        setView("question");
+      } catch {}
+    }
+  }, []);
+
+  // Timer
+  useEffect(() => {
+    if (view !== "question" || timerDuration === 0) return;
+    setTimeLeft(timerDuration);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) { clearInterval(timerRef.current); setTimedOut(true); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [view, qIndex, timerDuration]);
+
+  // Handle timer expiry with fresh state
+  useEffect(() => {
+    if (timedOut) { setTimedOut(false); handleNext(true); }
+  }, [timedOut]); // eslint-disable-line
+
+  const saveSession = () => {
+    localStorage.setItem("theory_session", JSON.stringify({
+      sessionQ, qIndex, answers, timerDuration, selectedTopic, mode,
+    }));
+  };
+
+  const handleExit = () => {
+    clearInterval(timerRef.current);
+    saveSession();
+    setSelected(null);
+    setView("start");
+    setConfirmExit(false);
+  };
+
+  const resumeSession = () => {
+    const saved = localStorage.getItem("theory_session");
+    if (!saved) return;
+    try {
+      const s = JSON.parse(saved);
+      setSessionQ(s.sessionQ);
+      setQIndex(s.qIndex);
+      setAnswers(s.answers || []);
+      setTimerDuration(s.timerDuration || 0);
+      setSelectedTopic(s.selectedTopic || "Все темы");
+      setMode(s.mode || "topic");
+      setSelected(null);
+      setTimeLeft(s.timerDuration || 0);
+      setView("question");
+    } catch {}
+  };
 
   const start = async () => {
     setView("loading");
     setLoadError(null);
+    localStorage.removeItem("theory_session");
     try {
       const topic = selectedTopic === "Все темы"
         ? TOPICS_LIST[Math.floor(Math.random() * (TOPICS_LIST.length - 1)) + 1]
@@ -54,8 +130,8 @@ export default function Theory() {
       setSessionQ(pool);
       setQIndex(0);
       setSelected(null);
-      setScore({ correct: 0, wrong: 0 });
       setAnswers([]);
+      setTimeLeft(timerDuration);
       setView("question");
     } catch {
       setLoadError("Не удалось загрузить вопросы. Проверь интернет-соединение.");
@@ -65,65 +141,66 @@ export default function Theory() {
 
   const handleSelect = (idx) => {
     if (selected !== null) return;
-    const q = sessionQ[qIndex];
-    const correct = idx === q.correct;
     setSelected(idx);
-    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
-    setAnswers((prev) => [...prev, { correct, topic: q.topic }]);
+    clearInterval(timerRef.current);
   };
 
-  const next = () => {
+  const handleNext = (timeout = false) => {
     const q = sessionQ[qIndex];
+    const correct = !timeout && selected === q.correct;
+    const newAnswers = [...answers, { correct, topic: q.topic }];
     const isLast = qIndex + 1 >= sessionQ.length;
-    const currentCorrect = selected === q.correct;
 
-    setSelected(null); // trigger close animation
-
-    setTimeout(() => {
+    const proceed = () => {
+      setAnswers(newAnswers);
       if (isLast) {
-        const allAnswers = [...answers, { correct: currentCorrect, topic: q.topic }];
+        localStorage.removeItem("theory_session");
         const byTopic = {};
-        allAnswers.forEach(({ topic, correct }) => {
+        newAnswers.forEach(({ topic, correct }) => {
           if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
           byTopic[topic].total += 1;
           if (correct) byTopic[topic].correct += 1;
         });
-        Object.entries(byTopic).forEach(([topic, { correct, total }]) => {
-          updateTopicStats(topic, correct, total);
-        });
+        Object.entries(byTopic).forEach(([topic, { correct, total }]) => updateTopicStats(topic, correct, total));
         checkAchievements();
         setView("finished");
-        return;
+      } else {
+        setQIndex((i) => i + 1);
       }
-      setQIndex((i) => i + 1);
-    }, 320);
+    };
+
+    if (timeout) {
+      proceed();
+    } else {
+      setSelected(null);
+      setTimeout(proceed, 320);
+    }
   };
 
+  const correctCount = answers.filter((a) => a.correct).length;
+  const pct = sessionQ.length > 0 ? Math.round((correctCount / sessionQ.length) * 100) : 0;
+  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  const motivation = pct >= 80 ? "Отличная работа! 🎉" : pct >= 60 ? "Хороший результат! 💪" : "Продолжай стараться! 📚";
   const weakTopics = sessionQ.reduce((acc, q, i) => {
     if (!answers[i]?.correct) acc[q.topic] = (acc[q.topic] || 0) + 1;
     return acc;
   }, {});
-  const pct = sessionQ.length > 0 ? Math.round((score.correct / sessionQ.length) * 100) : 0;
-  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
-  const motivation = pct >= 80 ? "Отличная работа! 🎉" : pct >= 60 ? "Хороший результат! 💪" : "Продолжай стараться! 📚";
 
-  // ── Загрузка ──────────────────────────────────────────────────────────────
-  if (view === "loading") {
-    return (
-      <div className="flex flex-col items-center justify-center gap-6 p-8 min-h-[60vh]">
-        <div className="w-14 h-14 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
-        <p className="text-sm font-semibold text-center" style={{ color: "var(--muted)" }}>
-          ИИ генерирует вопросы…
-        </p>
-      </div>
-    );
-  }
+  // ── Загрузка ─────────────────────────────────────────────────────────────────
+  if (view === "loading") return (
+    <div className="flex flex-col items-center justify-center gap-6 p-8 min-h-[60vh]">
+      <div className="w-14 h-14 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
+      <p className="text-sm font-semibold text-center" style={{ color: "var(--muted)" }}>
+        ИИ генерирует вопросы…
+      </p>
+    </div>
+  );
 
-  // ── Результаты ─────────────────────────────────────────────────────────────
+  // ── Результаты ───────────────────────────────────────────────────────────────
   if (view === "finished") return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex flex-col items-center gap-2 pt-4 pb-2">
-        <p className="text-4xl font-bold" style={{ color: "var(--text)" }}>{score.correct} / {sessionQ.length}</p>
+        <p className="text-4xl font-bold" style={{ color: "var(--text)" }}>{correctCount} / {sessionQ.length}</p>
         <div className="flex gap-1">
           {Array.from({ length: 5 }, (_, i) => (
             <Star key={i} size={26} fill={i < stars ? "#F97316" : "none"} stroke="#F97316" strokeWidth={1.5} />
@@ -152,83 +229,104 @@ export default function Theory() {
     </div>
   );
 
-  // ── Вопрос ─────────────────────────────────────────────────────────────────
+  // ── Вопрос ───────────────────────────────────────────────────────────────────
   if (view === "question") {
     const q = sessionQ[qIndex];
     return (
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex items-center justify-between pt-2">
-          <button onClick={() => setView("start")}
-            className="w-9 h-9 flex items-center justify-center rounded-xl"
-            style={{ background: "var(--card)", color: "var(--text)" }}>
-            <ArrowLeft size={18} />
-          </button>
-          <span className="text-xs font-bold px-3 py-1.5 rounded-full"
-            style={{ background: "var(--card)", color: "var(--text)" }}>
-            ✓ {score.correct} | ✗ {score.wrong}
-          </span>
-        </div>
-        <div>
-          <ProgressBar value={qIndex + 1} max={sessionQ.length} />
-          <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>Вопрос {qIndex + 1} / {sessionQ.length}</p>
-        </div>
-        <Card>
-          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: "#F97316" }}>
-            {q.topic}
-          </p>
-          <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
-        </Card>
-        <div className="flex flex-col gap-2">
-          {q.options.map((opt, idx) => {
-            let bg = "var(--card)", border = "var(--border)", color = "var(--text)", icon = null;
-            if (selected !== null) {
-              if (idx === q.correct)     { bg = "#F0FDF4"; border = "#22C55E"; color = "#15803D"; icon = "check"; }
-              else if (idx === selected) { bg = "#FEF2F2"; border = "#EF4444"; color = "#B91C1C"; icon = "wrong"; }
-            }
-            return (
-              <button key={idx} onClick={() => handleSelect(idx)}
-                className="w-full h-14 flex items-center justify-between px-4 rounded-2xl text-left text-base transition-all duration-200"
-                style={{ background: bg, border: `1.5px solid ${border}`, color }}>
-                <span><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt}</span>
-                {icon === "check" && (
-                  <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
-                    <Check size={14} color="white" strokeWidth={2.5} />
-                  </span>
-                )}
-                {icon === "wrong" && (
-                  <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EF4444" }}>
-                    <X size={14} color="white" strokeWidth={2.5} />
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div style={{
-          overflow: "hidden",
-          maxHeight: selected !== null ? "400px" : "0px",
-          opacity: selected !== null ? 1 : 0,
-          transition: "max-height 0.35s ease, opacity 0.3s ease",
-        }}>
-          {(q.formula || q.explanation) && (
-            <div className="rounded-2xl p-4 flex flex-col gap-3 mt-1" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
-              {q.formula && (
-                <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
-                  <TeX formula={q.formula} />
-                </div>
-              )}
-              {q.explanation && (
-                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>
-                  💡 {q.explanation}
-                </p>
-              )}
-              <button onClick={() => window.location.href = "/Cheatsheet"}
-                className="text-xs font-semibold text-left" style={{ color: "#F97316" }}>
-                → Открыть шпаргалку
-              </button>
+      <>
+        {confirmExit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
+              <p className="font-bold text-base" style={{ color: "var(--text)" }}>Выйти из теории?</p>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>Прогресс сохранится — можно будет продолжить.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setConfirmExit(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold border"
+                  style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
+                  Отмена
+                </button>
+                <button onClick={handleExit}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: "#F97316" }}>
+                  Сохранить и выйти
+                </button>
+              </div>
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-4 p-4" style={{ paddingBottom: selected !== null ? 144 : undefined }}>
+          <div className="flex items-center justify-between pt-2">
+            <button onClick={() => setConfirmExit(true)} className="flex items-center gap-1 text-sm" style={{ color: "var(--muted)" }}>
+              <X size={16} /> Выйти
+            </button>
+            {timerDuration > 0 && (
+              <span className="text-lg font-bold" style={{ color: timeLeft < 10 ? "#EF4444" : "var(--text)" }}>
+                ⏱ {formatTime(timeLeft)}
+              </span>
+            )}
+            <span className="text-xs" style={{ color: "var(--muted)" }}>Вопрос {qIndex + 1}/{sessionQ.length}</span>
+          </div>
+
+          <ProgressBar value={qIndex + 1} max={sessionQ.length} />
+
+          <Card>
+            <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: "#F97316" }}>
+              {q.topic}
+            </p>
+            <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
+          </Card>
+
+          <div className="flex flex-col gap-2">
+            {q.options.map((opt, idx) => {
+              let bg = "var(--card)", border = "var(--border)", color = "var(--text)", icon = null;
+              if (selected !== null) {
+                if (idx === q.correct)     { bg = "#F0FDF4"; border = "#22C55E"; color = "#15803D"; icon = "check"; }
+                else if (idx === selected) { bg = "#FEF2F2"; border = "#EF4444"; color = "#B91C1C"; icon = "wrong"; }
+              }
+              return (
+                <button key={idx} onClick={() => handleSelect(idx)}
+                  className="w-full h-14 flex items-center justify-between px-4 rounded-2xl text-left text-base transition-all duration-200"
+                  style={{ background: bg, border: `1.5px solid ${border}`, color }}>
+                  <span><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt}</span>
+                  {icon === "check" && (
+                    <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
+                      <Check size={14} color="white" strokeWidth={2.5} />
+                    </span>
+                  )}
+                  {icon === "wrong" && (
+                    <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#EF4444" }}>
+                      <X size={14} color="white" strokeWidth={2.5} />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{
+            overflow: "hidden",
+            maxHeight: selected !== null ? "400px" : "0px",
+            opacity: selected !== null ? 1 : 0,
+            transition: "max-height 0.35s ease, opacity 0.3s ease",
+          }}>
+            {(q.formula || q.explanation) && (
+              <div className="rounded-2xl p-4 flex flex-col gap-3 mt-1" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+                {q.formula && (
+                  <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
+                    <TeX formula={q.formula} />
+                  </div>
+                )}
+                {q.explanation && (
+                  <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>💡 {q.explanation}</p>
+                )}
+                <button onClick={() => window.location.href = "/Cheatsheet"}
+                  className="text-xs font-semibold text-left" style={{ color: "#F97316" }}>
+                  → Открыть шпаргалку
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Sticky next button above bottom nav */}
@@ -237,20 +335,22 @@ export default function Theory() {
           bottom: 64,
           left: 0,
           right: 0,
-          padding: "12px 16px",
+          padding: "20px 16px 12px",
           zIndex: 20,
+          background: "linear-gradient(to bottom, transparent, var(--bg) 40%)",
           transform: selected !== null ? "translateY(0)" : "translateY(120%)",
           transition: "transform 0.35s ease",
         }}>
-          <OrangeButton onClick={next}>
+          <OrangeButton onClick={() => handleNext()}>
             {qIndex + 1 >= sessionQ.length ? "Завершить →" : "Следующий →"}
           </OrangeButton>
         </div>
-      </div>
+      </>
     );
   }
 
-  // ── Стартовый экран ────────────────────────────────────────────────────────
+  // ── Стартовый экран ──────────────────────────────────────────────────────────
+  const hasSaved = !!localStorage.getItem("theory_session");
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-xl font-bold pt-2" style={{ color: "var(--text)" }}>Теория</h1>
@@ -259,6 +359,17 @@ export default function Theory() {
         <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: "#FEF2F2", color: "#B91C1C" }}>
           {loadError}
         </div>
+      )}
+
+      {hasSaved && (
+        <button onClick={resumeSession} className="w-full text-left rounded-2xl p-4 flex items-center gap-3"
+          style={{ background: "#FFF7ED", border: "2px solid #F97316" }}>
+          <span className="text-2xl">▶️</span>
+          <div>
+            <p className="text-sm font-bold" style={{ color: "#F97316" }}>Незавершённый тест</p>
+            <p className="text-xs mt-0.5" style={{ color: "#C2410C" }}>Нажми, чтобы продолжить</p>
+          </div>
+        </button>
       )}
 
       {/* Выбор темы */}
@@ -300,6 +411,24 @@ export default function Theory() {
             {m.label}
           </button>
         ))}
+      </div>
+
+      {/* Таймер */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm px-1" style={{ color: "var(--muted)" }}>⏱ Таймер на вопрос</p>
+        <div className="flex gap-1.5">
+          {TIMER_OPTIONS.map((opt) => (
+            <button key={opt.value} onClick={() => setTimerDuration(opt.value)}
+              className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+              style={{
+                background: timerDuration === opt.value ? "#F97316" : "var(--card)",
+                color: timerDuration === opt.value ? "#fff" : "var(--muted)",
+                border: `1px solid ${timerDuration === opt.value ? "#F97316" : "var(--border)"}`,
+              }}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <OrangeButton onClick={start}>Начать →</OrangeButton>

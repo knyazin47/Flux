@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, X } from "lucide-react";
+import { X } from "lucide-react";
 
 function Modal({ title, children, onClose }) {
   return (
@@ -33,12 +33,10 @@ function SectionHeader({ label }) {
 
 export default function SettingsPage() {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
-  const [examDate, setExamDate] = useState(localStorage.getItem("exam_date") || "2026-06-12");
-  const [examType, setExamType] = useState(localStorage.getItem("exam_type") || "ЦТ");
   const [dailyGoal, setDailyGoal] = useState(localStorage.getItem("daily_goal") || "10");
   const [notif, setNotif] = useState(localStorage.getItem("notif_enabled") === "true");
   const [notifTime, setNotifTime] = useState(localStorage.getItem("notif_time") || "20:00");
-  const [modal, setModal] = useState(null); // date | type | reset | time
+  const [modal, setModal] = useState(null); // reset | time
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -47,10 +45,6 @@ export default function SettingsPage() {
 
   const save = (key, val) => localStorage.setItem(key, val);
 
-  const formatDate = (d) => {
-    try { return new Date(d).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }); } catch { return d; }
-  };
-
   const handleReset = () => {
     localStorage.clear();
     window.location.href = "/Onboarding";
@@ -58,28 +52,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-1 p-4">
-      {modal === "date" && (
-        <Modal title="Дата экзамена" onClose={() => setModal(null)}>
-          <input type="date" value={examDate}
-            onChange={e => { setExamDate(e.target.value); save("exam_date", e.target.value); }}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }} />
-          <button onClick={() => setModal(null)} className="w-full py-3 rounded-2xl text-sm font-bold text-white" style={{ background: "#F97316" }}>Готово</button>
-        </Modal>
-      )}
-      {modal === "type" && (
-        <Modal title="Тип экзамена" onClose={() => setModal(null)}>
-          <div className="flex gap-2">
-            {["ЦТ", "ЦЭ", "Оба"].map(t => (
-              <button key={t} onClick={() => { setExamType(t); save("exam_type", t); setModal(null); }}
-                className="flex-1 py-3 rounded-2xl text-sm font-semibold"
-                style={{ background: examType === t ? "#F97316" : "var(--bg)", color: examType === t ? "#fff" : "var(--muted)", border: `1px solid ${examType === t ? "#F97316" : "var(--border)"}` }}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </Modal>
-      )}
       {modal === "time" && (
         <Modal title="Время напоминания" onClose={() => setModal(null)}>
           <input type="time" value={notifTime}
@@ -113,8 +85,8 @@ export default function SettingsPage() {
       {/* Экзамен */}
       <SectionHeader label="ЭКЗАМЕН" />
       <Card className="!py-0 !px-4">
-        <SettingRow left="📅 Дата ЦТ/ЦЭ" right={<>{formatDate(examDate)}<ChevronRight size={14} /></>} onClick={() => setModal("date")} />
-        <SettingRow left="🎯 Тип экзамена" right={<>{examType}<ChevronRight size={14} /></>} onClick={() => setModal("type")} />
+        <SettingRow left="📅 Дата ЦТ" right="5 июня 2026" />
+        <SettingRow left="🎯 Тип экзамена" right="ЦТ" />
       </Card>
 
       {/* Ежедневная цель */}
