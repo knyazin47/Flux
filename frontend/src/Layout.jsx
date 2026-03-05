@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPageUrl } from "@/utils";
 import { Link, useLocation } from "react-router-dom";
-import { Home, FileText, BookOpen, BarChart2, Settings, Moon, Sun, FlaskConical, GraduationCap, CreditCard } from "lucide-react";
+import { Home, FileText, BarChart2, Settings, Moon, Sun, GraduationCap, Play } from "lucide-react";
 import { checkAndUpdateStreak } from "@/utils/storage";
 
 const navItems = [
@@ -14,10 +14,19 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+  const [resumePage, setResumePage] = useState(null); // "Tasks" | "Theory" | null
 
   useEffect(() => {
     checkAndUpdateStreak();
   }, []);
+
+  useEffect(() => {
+    const hasTasks  = !!localStorage.getItem("tasks_session");
+    const hasTheory = !!localStorage.getItem("theory_session");
+    if (hasTasks)        setResumePage("Tasks");
+    else if (hasTheory)  setResumePage("Theory");
+    else                 setResumePage(null);
+  }, [currentPageName]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -69,6 +78,17 @@ export default function Layout({ children, currentPageName }) {
               ⚛️ Физика
             </span>
             <div className="flex items-center gap-2">
+              {resumePage && (
+                <Link
+                  to={createPageUrl(resumePage)}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors relative"
+                  style={{ background: "#FFF7ED", color: "#F97316" }}
+                  title="Продолжить тест"
+                >
+                  <Play size={16} fill="#F97316" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: "#F97316", border: "2px solid var(--card)" }} />
+                </Link>
+              )}
               <button
                 onClick={() => setDark((d) => !d)}
                 className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors"

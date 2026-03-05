@@ -85,8 +85,14 @@ export default function SettingsPage() {
       {/* Экзамен */}
       <SectionHeader label="ЭКЗАМЕН" />
       <Card className="!py-0 !px-4">
-        <SettingRow left="📅 Дата ЦТ" right="5 июня 2026" />
-        <SettingRow left="🎯 Тип экзамена" right="ЦТ" />
+        <div className="w-full flex items-center justify-between py-3.5 border-b" style={{ borderColor: "var(--border)" }}>
+          <span className="text-sm" style={{ color: "var(--text)" }}>📅 Дата ЦТ</span>
+          <span className="text-sm" style={{ color: "var(--muted)" }}>5 июня 2026</span>
+        </div>
+        <div className="w-full flex items-center justify-between py-3.5">
+          <span className="text-sm" style={{ color: "var(--text)" }}>🎯 Тип экзамена</span>
+          <span className="text-sm" style={{ color: "var(--muted)" }}>ЦТ</span>
+        </div>
       </Card>
 
       {/* Ежедневная цель */}

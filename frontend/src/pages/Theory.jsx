@@ -286,9 +286,9 @@ export default function Theory() {
               }
               return (
                 <button key={idx} onClick={() => handleSelect(idx)}
-                  className="w-full h-14 flex items-center justify-between px-4 rounded-2xl text-left text-base transition-all duration-200"
+                  className="w-full min-h-[3.5rem] h-auto flex items-start justify-between gap-2 px-4 py-3.5 rounded-2xl text-left text-base transition-all duration-200"
                   style={{ background: bg, border: `1.5px solid ${border}`, color }}>
-                  <span><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt}</span>
+                  <span className="leading-snug"><span className="font-semibold mr-2">{LABELS[idx]})</span>{opt.replace(/^[АБВГД][:.]\s*/u, "")}</span>
                   {icon === "check" && (
                     <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22C55E" }}>
                       <Check size={14} color="white" strokeWidth={2.5} />
