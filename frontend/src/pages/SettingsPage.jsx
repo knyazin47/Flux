@@ -3,6 +3,13 @@ import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
 import { X, ChevronRight } from "lucide-react";
 import { APP_VERSION } from "@/version";
+import { CACHE_TS_KEY } from "@/utils/generateQuestions";
+
+function formatQuestionsTs(iso) {
+  if (!iso) return "нет данных";
+  const d = new Date(iso);
+  return d.toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+}
 
 function Modal({ title, children, onClose }) {
   return (
@@ -38,6 +45,7 @@ export default function SettingsPage() {
   const [notif, setNotif] = useState(localStorage.getItem("notif_enabled") === "true");
   const [notifTime, setNotifTime] = useState(localStorage.getItem("notif_time") || "20:00");
   const [modal, setModal] = useState(null); // reset | time
+  const questionsUpdatedAt = formatQuestionsTs(localStorage.getItem(CACHE_TS_KEY));
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -121,6 +129,15 @@ export default function SettingsPage() {
         {notif && (
           <SettingRow left="⏰ Время" right={<>{notifTime}<ChevronRight size={14} /></>} onClick={() => setModal("time")} />
         )}
+      </Card>
+
+      {/* Вопросы */}
+      <SectionHeader label="ВОПРОСЫ" />
+      <Card className="!py-0 !px-4">
+        <div className="flex items-center justify-between py-3.5">
+          <span className="text-sm" style={{ color: "var(--text)" }}>Последнее обновление</span>
+          <span className="text-sm" style={{ color: "var(--muted)" }}>{questionsUpdatedAt}</span>
+        </div>
       </Card>
 
       {/* Данные */}

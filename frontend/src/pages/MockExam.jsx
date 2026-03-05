@@ -4,6 +4,7 @@ import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { X, Flag } from "lucide-react";
 import { generateQuestions } from "@/utils/generateQuestions";
+import { addXP, addRtResult } from "@/utils/storage";
 
 const TOPICS = [
   "Механика", "Молекулярная физика", "Термодинамика",
@@ -139,6 +140,8 @@ export default function MockExam() {
         if (userAnswers[i] === q.correct) stats[t].correct += 1;
       });
       localStorage.setItem("topic_stats", JSON.stringify(stats));
+      const correct = questions.filter((q, i) => userAnswers[i] === q.correct).length;
+      addXP(correct * (format === "full" ? 5 : 10));
     } catch {}
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -410,9 +413,12 @@ export default function MockExam() {
           {showErrors ? "Скрыть ошибки" : "Разбор ошибок"}
         </button>
         <OrangeButton onClick={() => {
-          const results = JSON.parse(localStorage.getItem("rt_results") || "[]");
-          results.unshift({ date: new Date().toISOString().slice(0, 10), type: format === "full" ? "Полный" : "Мини", score: pct, notes: `${correctCount}/${questions.length}` });
-          localStorage.setItem("rt_results", JSON.stringify(results));
+          addRtResult({
+            date: new Date().toISOString().slice(0, 10),
+            type: format === "full" ? "Полный" : "Мини",
+            score: pct,
+            note: `${correctCount}/${questions.length}`,
+          });
           setSaveModal(true);
         }}>
           Сохранить результат

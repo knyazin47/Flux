@@ -124,11 +124,10 @@ export default function Tasks() {
 
   const handleExit = () => {
     clearInterval(timerRef.current);
-    saveSessionSnapshot();
+    localStorage.removeItem("tasks_session");
     setSelected(null);
     setView("start");
     setConfirmExit(false);
-    setResumeModal(true);
   };
 
   const startSession = async () => {
@@ -314,7 +313,7 @@ export default function Tasks() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="rounded-2xl p-6 w-full max-w-xs flex flex-col gap-4" style={{ background: "var(--card)" }}>
             <p className="font-bold text-base" style={{ color: "var(--text)" }}>Выйти из задания?</p>
-            <p className="text-sm" style={{ color: "var(--muted)" }}>Прогресс сохранится — можно будет продолжить.</p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>Прогресс не сохранится.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmExit(false)}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold border"
@@ -323,8 +322,8 @@ export default function Tasks() {
               </button>
               <button onClick={handleExit}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ background: "#F97316" }}>
-                Сохранить и выйти
+                style={{ background: "#EF4444" }}>
+                Выйти
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@
 
 const CACHE_KEY = "daily_questions_data";
 const CACHE_DATE_KEY = "daily_questions_date";
+export const CACHE_TS_KEY = "daily_questions_ts";
 
 function today() {
   return new Date().toISOString().split("T")[0];
@@ -25,6 +26,7 @@ function writeCache(questionsObj) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(questionsObj));
     localStorage.setItem(CACHE_DATE_KEY, today());
+    localStorage.setItem(CACHE_TS_KEY, new Date().toISOString());
   } catch {
     // localStorage переполнен — игнорируем
   }

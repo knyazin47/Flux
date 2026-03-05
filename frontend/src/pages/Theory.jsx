@@ -6,7 +6,7 @@ import { X, ChevronDown, Star, Check } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
-import { updateTopicStats, checkAchievements } from "@/utils/storage";
+import { addXP, incrementTodayDone, updateTopicStats, checkAchievements } from "@/utils/storage";
 
 function TeX({ formula }) {
   const html = katex.renderToString(formula, { throwOnError: false, displayMode: true });
@@ -163,6 +163,9 @@ export default function Theory() {
           if (c) byTopic[topic].correct += 1;
         });
         Object.entries(byTopic).forEach(([topic, { correct: c, total }]) => updateTopicStats(topic, c, total));
+        const correctCount = newAnswers.filter(a => a.correct).length;
+        addXP(correctCount * 10);
+        incrementTodayDone(sessionQ.length);
         checkAchievements();
         setView("finished");
       } else {
