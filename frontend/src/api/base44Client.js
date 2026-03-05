@@ -1,14 +1,9 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
-
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
-
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
-  appBaseUrl
-});
+// Stub client — this app is fully local (no backend, no auth).
+// Kept for compatibility with any legacy imports.
+export const base44 = {
+  auth: {
+    me: () => Promise.reject(new Error("No auth backend")),
+    logout: () => Promise.resolve(),
+  },
+  entities: {},
+};

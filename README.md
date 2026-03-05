@@ -1,309 +1,134 @@
-# Физика ЦТ/ЦЭ 2026 — PWA приложение
+# Физика ЦТ/ЦЭ 2026
 
-Мобильное приложение для подготовки к ЦТ/ЦЭ по физике (Беларусь, 2026).
-2 устройства: Huawei P Smart 2021 (Android + Chrome) + iPhone 15 (iOS 17 + Safari).
+> Mobile-first PWA for Belarus physics exam preparation (ЦТ/ЦЭ 2026).
 
-## Стек
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-| Слой | Решение |
+---
+
+## Features
+
+- **Daily practice** — 5-choice MCQ questions pulled from a daily-generated question bank
+- **Theory mode** — topic-based question sessions with explanations and performance tracking
+- **Mock exams** — full (30 questions / 90 min) or mini (10 questions / 30 min) exam simulations
+- **Formula cards** — SM-2 spaced-repetition flashcards for all 9 physics topics
+- **Cheatsheet** — formula reference with starred "hard" entries
+- **Progress tracking** — XP, streaks, topic heatmap, RT/DRT history, achievements
+- **Session persistence** — in-progress sessions auto-saved and resumable
+- **Offline-ready** — fully localStorage-based, no accounts, no backend
+- **Dark/light theme** — system-aware with manual toggle
+
+## Tech Stack
+
+| Layer | Technology |
 |---|---|
-| Frontend | React + Vite (сгенерирован через Lovable) |
-| Хостинг | Vercel |
-| Хранилище | `localStorage` (без бэкенда, без аккаунтов) |
-| Push | Web Push API + service worker (не реализовано) |
-| Формулы | KaTeX для рендеринга LaTeX |
-| Установка | PWA manifest (планируется) |
+| Framework | React 18 + Vite 6 |
+| Styling | Tailwind CSS 3 + shadcn/ui |
+| Routing | React Router 6 |
+| Math rendering | KaTeX |
+| Animations | Framer Motion |
+| Storage | `localStorage` only |
+| CI | GitHub Actions + Claude CLI |
+| Hosting | Vercel |
 
----
+## Getting Started
 
-## Структура localStorage
+### Prerequisites
 
-```
-exam_date          – дата экзамена (строка ISO, напр. "2026-06-12")
-exam_type          – тип ("ЦТ" / "ЦЭ" / "Оба")
-daily_goal         – дневная цель в заданиях (5 / 10 / 15)
-theme              – "dark" / "light"
-notif_enabled      – "true" / "false"
-notif_time         – время уведомления (напр. "19:00")
-onboarding_done    – "true" — онбординг пройден
+- Node.js 18+
+- npm 9+
 
-streak_days        – текущий стрик (число)
-streak_last_date   – дата последней активности (ISO string, для проверки стрика)
-today_done         – задач выполнено сегодня
-today_xp           – XP заработано сегодня
-xp_total           – суммарный XP
-
-topic_stats        – JSON: { "Механика": { correct: N, total: N }, ... }
-rt_results         – JSON array: [{ date, type, score, note }, ...]
-starred_formulas   – JSON array: ["m1", "e2", ...] (id формул)
-formula_progress   – JSON: { "m1": { status: "know"|"hard"|"new", nextReview, interval }, ... }
-achievements       – JSON array: [{ id, unlockedAt }, ...]
-```
-
----
-
-## Экраны (9 штук)
-
-### 1. Онбординг (`Onboarding.jsx`)
-Показывается только при первом запуске (`onboarding_done` отсутствует).
-
-**Текущее состояние:** ✅ UI реализован
-**Функционал:**
-- [x] Выбор типа экзамена (ЦТ / ЦЭ / Оба)
-- [x] Datepicker даты экзамена
-- [x] Выбор дневной цели (5 / 10 / 15 задач)
-- [ ] Сохранение в localStorage при нажатии "Начать"
-- [ ] Перенаправление на Dashboard после завершения
-- [ ] Запрос разрешения push-уведомлений
-
----
-
-### 2. Главная (`Dashboard.jsx`)
-**Текущее состояние:** ✅ UI реализован, частично читает localStorage
-**Функционал:**
-- [x] Блок отсчёта до экзамена (читает `exam_date`, `exam_type`)
-- [x] Стрик-блок (читает `streak_days`)
-- [x] Прогресс дня (читает `today_done`, `daily_goal`, `today_xp`)
-- [x] Блок XP / Уровень (читает `xp_total`)
-- [x] Быстрый доступ: 4 карточки (Задания / Формулы / Теория / Экзамен)
-- [x] Таблица последних результатов РТ (читает `rt_results`)
-- [ ] Логика стрика: проверять `streak_last_date` при открытии, сбрасывать/сохранять стрик
-- [ ] Сброс `today_done` и `today_xp` при смене дня
-
----
-
-### 3. Ежедневные задания (`Tasks.jsx`)
-**Текущее состояние:** ✅ UI полностью реализован, данные — заглушка
-**Функционал:**
-- [x] Экран выбора темы + переключатель таймера
-- [x] Вопрос с 5 вариантами ответа (KaTeX для формул)
-- [x] Индикаторы верного/неверного ответа (зелёный/красный значок)
-- [x] Объяснение после ответа
-- [x] Кольцевой таймер (3 минуты)
-- [x] Экран результатов: звёзды, XP заработано, слабые темы
-- [ ] **Загрузить реальные вопросы из базы** (сейчас 10 заглушек)
-- [ ] При завершении: записать в `today_done` += кол-во вопросов
-- [ ] При завершении: записать в `today_xp` += correct × 10
-- [ ] При завершении: записать в `xp_total` += earned XP
-- [ ] При завершении: обновить `topic_stats`
-- [ ] При завершении: запустить проверку достижений
-- [ ] При завершении: обновить стрик
-
----
-
-### 4. Карточки формул (`FormulaCards.jsx`)
-**Текущее состояние:** ✅ UI реализован, данные — маленькая заглушка
-**Функционал:**
-- [x] 3 вкладки: По темам / Повторение / Сложные
-- [x] Flip-карточка: название → формула + единицы
-- [x] Оценка: "Знаю" / "Сложно" / "Не знаю"
-- [x] Кнопка "Добавить в сложные ⭐"
-- [ ] **Загрузить все ~82 формулы из `formulas.json`** (сейчас ~15 заглушек)
-- [ ] Отображать LaTeX через KaTeX
-- [ ] Сохранять оценки в `formula_progress` (localStorage)
-- [ ] Читать `starred_formulas` для вкладки "Сложные"
-- [ ] Записывать `starred_formulas` при добавлении/удалении звезды
-- [ ] **Алгоритм SM-2**: вычислять `nextReview` и `interval` по оценке
-- [ ] Вкладка "Повторение": показывать только карточки с `nextReview <= today`
-
----
-
-### 5. Теория (`Theory.jsx`)
-**Текущее состояние:** ✅ UI полностью реализован, данные — 9 заглушек
-**Функционал:**
-- [x] Фильтр по темам (выпадающий список)
-- [x] Режим: По теме / Случайные
-- [x] Вопрос с 5 вариантами (KaTeX для формул)
-- [x] Объяснение + ссылка на шпаргалку
-- [x] Экран результатов со звёздами и слабыми местами
-- [ ] **Загрузить реальные теоретические вопросы** (сейчас 9 заглушек по 1 на тему)
-- [ ] Обновить `topic_stats` после завершения сессии
-
----
-
-### 6. Пробный экзамен (`MockExam.jsx`)
-**Текущее состояние:** ✅ UI реализован, данные — 10 заглушек
-**Функционал:**
-- [x] Выбор формата: Полный (30 вопросов, 90 мин) / Мини (10 вопросов, 30 мин)
-- [x] Выбор тем (чекбоксы)
-- [x] Таймер обратного отсчёта
-- [x] Прогресс-бар + навигационные точки по вопросам
-- [x] Флаг (закладка) для возврата к вопросу
-- [x] Экран результатов: балл, разбивка по темам, анализ ошибок
-- [ ] **Загрузить реальные задачи из базы** (сейчас 10 заглушек)
-- [ ] Сохранять результат в `rt_results` при нажатии "Сохранить"
-- [ ] Начислять XP за прохождение (+100)
-- [ ] Обновлять `topic_stats`
-- [ ] Проверять достижение "Отличник" (100%)
-
----
-
-### 7. Прогресс (`Progress.jsx`)
-**Текущее состояние:** ✅ UI реализован, данные — жёстко заданная заглушка
-**Функционал:**
-- [x] 4 вкладки: Статистика / Темы / РТ/ДРТ / 🏆
-- [x] График активности за 30 дней (сейчас случайные данные)
-- [x] Разбивка точности по темам (сейчас жёстко заданные %)
-- [x] Таблица РТ/ДРТ с модальным окном добавления
-- [x] Галерея достижений
-- [ ] **Читать `topic_stats` из localStorage** (заменить заглушку)
-- [ ] **Читать `rt_results` из localStorage** (уже читает — проверить)
-- [ ] **Читать `achievements` из localStorage** (заменить заглушку)
-- [ ] График: сохранять ежедневные XP/задачи и строить реальный график
-- [ ] Сохранять добавленные результаты РТ в localStorage
-
----
-
-### 8. Шпаргалка (`Cheatsheet.jsx`)
-**Текущее состояние:** ✅ UI реализован, данные — маленькая заглушка
-**Функционал:**
-- [x] Список формул по темам (коллапсируемые секции)
-- [x] Поиск по формуле / названию
-- [x] Кнопка "⭐ В сложные"
-- [x] Вкладка "⭐ Сложные" (избранные)
-- [ ] **Загрузить все ~82 формулы из `formulas.json`**
-- [ ] Отображать LaTeX через KaTeX
-- [ ] Читать/записывать `starred_formulas` в localStorage
-- [ ] Синхронизировать звёздочки с FormulaCards
-
----
-
-### 9. Настройки (`SettingsPage.jsx`)
-**Текущее состояние:** ✅ UI реализован
-**Функционал:**
-- [x] Переключатель тёмной/светлой темы
-- [x] Редактирование даты экзамена
-- [x] Выбор типа экзамена
-- [x] Изменение дневной цели
-- [x] Включение/выключение уведомлений
-- [x] Выбор времени уведомления
-- [x] Кнопка сброса данных с подтверждением
-- [ ] Сохранение всех настроек в localStorage
-- [ ] Регистрация service worker для push-уведомлений
-
----
-
-## ИИ-генерация вопросов
-
-### Модель
-**Anthropic Claude Haiku 4.5** (`claude-haiku-4-5`)
-
-Причины выбора:
-- Самая низкая задержка из всей линейки Claude — критично для мобильного UX
-- Стоимость: ~$1 / 1M токенов (в 5× дешевле Sonnet)
-- Достаточное качество для структурированных задач по физике с чёткими правилами
-- Поддерживает JSON structured outputs — надёжный формат вопросов
-
-### Архитектура (PWA на смартфоне)
-
-PWA устанавливается на телефон и запускается в изолированном WebView. Для защиты ключа API используется **Vercel Serverless Function** как прокси — ключ хранится только на сервере в переменных окружения Vercel, во frontend-коде его нет.
-
-```
-[Tasks / Theory / MockExam на телефоне]
-    ↓ POST /api/generate  (без ключа)
-[Vercel Edge Function — /api/generate.js]
-    ↓ ANTHROPIC_API_KEY (серверная env-переменная)
-[Claude Haiku 4.5 API]
-    ↓ JSON { questions: [...] }
-[Компонент рендерит вопросы + кэширует в localStorage]
-```
-
-### Формат вопроса (JSON schema)
-
-```json
-{
-  "id": "string",
-  "topic": "Механика | Молекулярная физика | ...",
-  "subtopic": "string",
-  "difficulty": 1 | 2 | 3,
-  "text": "string",
-  "formula": "latex string | null",
-  "options": ["А", "Б", "В", "Г", "Д"],
-  "correct": 0,
-  "explanation": "string"
-}
-```
-
-### Стратегия запросов
-
-| Экран | Триггер генерации | Кэш |
-|---|---|---|
-| Tasks | При старте сессии (если кэш пуст или устарел) | localStorage 24ч |
-| Theory | При выборе темы (если кэш темы пуст) | localStorage 24ч |
-| MockExam | При нажатии «Начать» (если банк < N вопросов) | localStorage 24ч |
-
-Если нет интернета — используются вопросы из кэша. При первом запуске без сети показывается заглушка "Нет подключения".
-
-### Промпт-система
-
-Каждый запрос содержит:
-1. Системный промпт: стиль ЦТ/ЦЭ Беларусь, 5 вариантов, один верный
-2. Список формул темы из `formulas.json` как контекст
-3. Уровень сложности и тему
-4. Количество вопросов (Tasks: 10, Theory: 15, MockExam: 30/10)
-
----
-
-## Контент
-
-| Источник | Статус | Используется в |
-|---|---|---|
-| `data/formulas.json` | ✅ готов (~82 формулы) | Cheatsheet, FormulaCards, промпты |
-| Claude Haiku 4.5 (runtime) | 🔄 реализовать | Tasks, Theory, MockExam |
-
----
-
-## Фаза 3 — план реализации (приоритеты)
-
-### Приоритет 1 — Хранилище и стрик
-- [ ] `useStorage` хук или утилита для безопасной работы с localStorage
-- [ ] Логика стрика (сброс / тлеющий / полный)
-- [ ] Обновление `today_done`, `today_xp`, `xp_total` после заданий
-
-### Приоритет 2 — Контент из formulas.json
-- [ ] Загрузить formulas.json в Cheatsheet
-- [ ] Загрузить formulas.json в FormulaCards
-- [ ] KaTeX рендеринг LaTeX в этих страницах
-
-### Приоритет 3 — Vercel API + генерация вопросов
-- [ ] Vercel Serverless Function: `api/generate.js`
-- [ ] `ANTHROPIC_API_KEY` в переменных окружения Vercel
-- [ ] Клиентская функция `generateQuestions(topic, type, count)`
-- [ ] Кэширование ответов в localStorage (TTL 24ч)
-- [ ] Fallback при отсутствии сети (кэш)
-- [ ] Подключить к Tasks.jsx, Theory.jsx, MockExam.jsx
-
-### Приоритет 4 — Запись прогресса
-- [ ] Tasks.jsx → обновление localStorage по завершении
-- [ ] Theory.jsx → обновление localStorage по завершении
-- [ ] MockExam.jsx → сохранение результата в rt_results
-
-### Приоритет 5 — Настройки и онбординг
-- [ ] Onboarding.jsx → сохранение настроек при старте
-- [ ] SettingsPage.jsx → запись всех изменений в localStorage
-
-### Приоритет 6 — Реальные данные в Progress
-- [ ] Читать topic_stats, achievements, activity_log из localStorage
-- [ ] Алгоритм SM-2 для FormulaCards
-
-### Приоритет 7 — Push и PWA
-- [ ] PWA manifest + иконки
-- [ ] Service worker + Web Push API
-- [ ] Тест на Huawei P Smart 2021 + iPhone 15
-
----
-
-## Запуск
+### Setup
 
 ```bash
-cd frontend
+git clone https://github.com/your-org/physics-cte-2026.git
+cd physics-cte-2026/frontend
 npm install
-npm run dev       # localhost:5173
-npm run build     # production build
+cp .env.example .env.local
+# Edit .env.local — see .env.example for details
+npm run dev
 ```
 
----
+The app runs at `http://localhost:5173`.
 
-## Деплой
+### Environment Variables
 
-Vercel — автодеплой из GitHub при push в main.
+See [`frontend/.env.example`](frontend/.env.example) for all required and optional variables.
+
+## Project Structure
+
+```
+Physics/
+  frontend/            # React PWA (Vite)
+    src/
+      pages/           # One file per screen (9 pages)
+      components/      # Shared UI components
+      utils/           # localStorage helpers, XP logic
+      lib/             # Routing helpers, auth stub
+      api/             # No-op API client stub
+    public/            # Static assets, daily-questions.json
+  data/
+    formulas.json      # Master formula database (LaTeX + metadata)
+  scripts/
+    generate-daily.js  # Daily question generation via Claude CLI
+  docs/                # Architecture, development, contributing guides
+  .github/workflows/
+    main.yml           # Daily CI: generate questions + commit
+```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a deeper technical dive.
+
+## Daily Question Generation
+
+A GitHub Action runs daily at **09:00 Minsk time** and commits a fresh `frontend/public/daily-questions.json`.
+
+To run locally:
+
+```bash
+node scripts/generate-daily.js
+```
+
+Requires the `claude` CLI to be authenticated (OAuth). See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## Scripts
+
+All commands run from `frontend/`:
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | ESLint (quiet) |
+| `npm run lint:fix` | ESLint with auto-fix |
+| `npm run typecheck` | TypeScript type check |
+
+## Physics Topics
+
+Механика · Молекулярная физика · Термодинамика · Электростатика · Постоянный ток · Электромагнетизм · Колебания и волны · Оптика · Квантовая и ядерная физика
+
+## Gamification
+
+| Event | XP |
+|---|---|
+| Correct answer | +10 |
+| Daily goal reached | +50 |
+| Mock exam completed | +100 |
+| 7-day streak | +150 |
+
+Levels: Физик (0) → Механик (200) → Учёный (500) → Академик (1000) → Эйнштейн (2000)
+
+## Contributing
+
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
+## Roadmap
+
+See [PLAN.md](PLAN.md) for the phased technical roadmap.
+
+## License
+
+MIT
