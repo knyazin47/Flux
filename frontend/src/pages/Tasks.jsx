@@ -5,7 +5,6 @@ import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { ArrowLeft, Star, Check, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { createPageUrl } from "@/utils";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
@@ -239,11 +238,6 @@ export default function Tasks() {
 
       <Card>
         <p className="text-base leading-relaxed" style={{ color: "var(--text)" }}>{q.text}</p>
-        {q.formula && (
-          <div className="mt-3 py-3 px-4 rounded-xl text-center overflow-x-auto" style={{ background: "var(--bg)" }}>
-            <TeX formula={q.formula} />
-          </div>
-        )}
       </Card>
 
       <div className="flex flex-col gap-2">
@@ -273,18 +267,34 @@ export default function Tasks() {
         })}
       </div>
 
-      {selected !== null && (
-        <div className="flex flex-col gap-3">
-          {q.explanation && (
-            <Card style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
-              <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>💡 {q.explanation}</p>
-            </Card>
+      <div
+        style={{
+          overflow: "hidden",
+          maxHeight: selected !== null ? "500px" : "0px",
+          opacity: selected !== null ? 1 : 0,
+          transition: "max-height 0.35s ease, opacity 0.3s ease",
+        }}
+      >
+        <div className="flex flex-col gap-3 pt-1">
+          {(q.formula || q.explanation) && (
+            <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+              {q.formula && (
+                <div className="py-2 px-3 rounded-xl text-center overflow-x-auto" style={{ background: "rgba(255,255,255,0.6)" }}>
+                  <TeX formula={q.formula} />
+                </div>
+              )}
+              {q.explanation && (
+                <p className="text-sm leading-relaxed" style={{ color: "#92400E" }}>
+                  💡 {q.explanation}
+                </p>
+              )}
+            </div>
           )}
           <OrangeButton onClick={() => handleNext()}>
             {qIndex + 1 >= sessionQuestions.length ? "Завершить →" : "Следующий →"}
           </OrangeButton>
         </div>
-      )}
+      </div>
     </div>
   );
 
@@ -317,7 +327,7 @@ export default function Tasks() {
       )}
 
       <div className="flex flex-col gap-3">
-        <OrangeButton onClick={() => window.location.href = createPageUrl("Dashboard")}>
+        <OrangeButton onClick={() => window.location.href = "/Dashboard"}>
           На главную
         </OrangeButton>
         <button onClick={() => { setView("start"); setAnswers([]); }}
