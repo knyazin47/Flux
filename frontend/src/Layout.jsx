@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPageUrl } from "@/utils";
 import { Link, useLocation } from "react-router-dom";
-import { Home, FileText, BarChart2, Settings, Moon, Sun, GraduationCap, ClipboardList } from "lucide-react";
+import { Home, FileText, BarChart2, Settings, Moon, Sun, GraduationCap, ClipboardList, Github } from "lucide-react";
 import { checkAndUpdateStreak } from "@/utils/storage";
 import { prefetchQuestions } from "@/utils/generateQuestions";
 
@@ -84,7 +84,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* HEADER */}
           <header
-            className="flex items-center justify-between px-4 shrink-0 z-30"
+            className="flex items-center justify-between px-4 shrink-0 z-30 relative"
             style={{
               height: 56,
               background: "var(--card)",
@@ -93,7 +93,16 @@ export default function Layout({ children, currentPageName }) {
               top: 0,
             }}
           >
-            <span className="text-base font-bold" style={{ color: "var(--text)" }}>
+            <a
+              href="https://github.com/knyazin47"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors"
+              style={{ background: "var(--bg)", color: "var(--muted)" }}
+            >
+              <Github size={18} />
+            </a>
+            <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold" style={{ color: "var(--text)" }}>
               Flux
             </span>
             <div className="flex items-center gap-2">

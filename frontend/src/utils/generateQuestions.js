@@ -15,6 +15,7 @@ function today() {
 function readCache() {
   try {
     if (localStorage.getItem(CACHE_DATE_KEY) !== today()) return null;
+    if (!localStorage.getItem(CACHE_GENERATED_AT_KEY)) return null; // force re-fetch if metadata missing
     const raw = localStorage.getItem(CACHE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
