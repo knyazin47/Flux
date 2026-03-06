@@ -258,16 +258,15 @@ export default function SettingsPage() {
       {/* Ежедневная цель */}
       <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
       <Card>
-        <div className="flex gap-2">
-          {["5", "10", "15"].map(g => (
-            <button key={g} onClick={() => { setDailyGoal(g); save("daily_goal", g); }}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-              style={{ background: dailyGoal === g ? "#F97316" : "var(--bg)", color: dailyGoal === g ? "#fff" : "var(--muted)", border: `1px solid ${dailyGoal === g ? "#F97316" : "var(--border)"}` }}>
-              {g}
-            </button>
-          ))}
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm" style={{ color: "var(--muted)" }}>Задач ежедневно</p>
+          <p className="text-sm font-bold" style={{ color: "#F97316" }}>{dailyGoal}</p>
         </div>
-        <p className="text-xs mt-2 text-center" style={{ color: "var(--muted)" }}>{dailyGoal} задач ежедневно</p>
+        <input
+          type="range" min={1} max={15} value={dailyGoal}
+          onChange={e => { setDailyGoal(e.target.value); save("daily_goal", e.target.value); }}
+          style={{ width: "100%", accentColor: "#F97316" }}
+        />
       </Card>
 
       {/* Уведомления */}

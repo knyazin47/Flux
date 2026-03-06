@@ -91,7 +91,7 @@ export default function Dashboard() {
         {/* Streak */}
         <div className="rounded-2xl p-4 flex flex-col items-center gap-1"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <span style={{ fontSize: 32, lineHeight: 1 }}>{streak > 0 ? "🔥" : "💤"}</span>
+          <span style={{ fontSize: 32, lineHeight: 1 }}>🔥</span>
           <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
           <p className="text-xs" style={{ color: "var(--muted)" }}>Стрик</p>
         </div>

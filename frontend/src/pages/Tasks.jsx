@@ -19,8 +19,6 @@ const TOPICS_FILTER = [
   "Колебания и волны", "Оптика", "Квантовая и ядерная физика",
 ];
 const LABELS = ["А", "Б", "В", "Г", "Д"];
-const SESSION_COUNT = 10;
-
 const TIMER_OPTIONS = [
   { label: "Нет",   value: 0   },
   { label: "30с",   value: 30  },
@@ -63,6 +61,7 @@ export default function Tasks() {
   const [loadError, setLoadError]     = useState(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [timedOut, setTimedOut]       = useState(false);
+  const [sessionCount, setSessionCount] = useState(10);
   const [resumeModal, setResumeModal] = useState(() => !!localStorage.getItem("tasks_session"));
   const timerRef = useRef(null);
 
@@ -138,7 +137,7 @@ export default function Tasks() {
       const topic = activeTopic === "Все"
         ? TOPICS_FILTER[Math.floor(Math.random() * (TOPICS_FILTER.length - 1)) + 1]
         : activeTopic;
-      const qs = await generateQuestions(topic, SESSION_COUNT, 2);
+      const qs = await generateQuestions(topic, sessionCount, 2);
       if (qs.length === 0) throw new Error("Нет вопросов");
       setSessionQ(qs);
       setQIndex(0);
@@ -187,6 +186,7 @@ export default function Tasks() {
         setAnswers(newAnswers);
         setView("results");
       } else {
+        setSelected(null);
         setAnswers(newAnswers);
         setQIndex(nextIndex);
       }
@@ -195,8 +195,7 @@ export default function Tasks() {
     if (timeout) {
       proceed();
     } else {
-      setSelected(null);
-      setTimeout(proceed, 320);
+      setTimeout(proceed, 200);
     }
   };
 
@@ -280,6 +279,18 @@ export default function Tasks() {
                 {t}
               </button>
             ))}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <p className="text-sm" style={{ color: "var(--muted)" }}>Количество вопросов</p>
+              <p className="text-sm font-bold" style={{ color: "#F97316" }}>{sessionCount}</p>
+            </div>
+            <input
+              type="range" min={1} max={15} value={sessionCount}
+              onChange={e => setSessionCount(Number(e.target.value))}
+              style={{ width: "100%", accentColor: "#F97316" }}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
