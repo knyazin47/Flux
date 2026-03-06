@@ -35,7 +35,9 @@ jobs:
           chmod 600 ~/.claude/.credentials.json
 
       - name: Verify Claude auth
-        run: claude --version
+        run: |
+          claude --version
+          claude auth status --text
 
       - name: Generate questions
         run: node scripts/generate-daily.js
