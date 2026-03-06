@@ -256,7 +256,7 @@ export default function SettingsPage() {
       <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
       <Card>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-semibold" style={{ color: "#F97316" }}>Задач ежедневно</p>
+          <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Задач ежедневно</p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>{dailyGoal}</p>
         </div>
         <input
