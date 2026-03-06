@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useMemo, useRef, useCallback } from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "@/context/ThemeContext";
 import { lsGet } from "@/utils/storage";
 import type { DashboardHomeProps } from "@/navigation/types";
@@ -63,10 +64,15 @@ function Bar({ pct }: { pct: number }) {
 
 // ── screen ────────────────────────────────────────────────────────────────────
 
-type Props = DashboardHomeProps;
-
-export default function DashboardScreen({ navigation }: Props) {
+export default function DashboardScreen({ navigation }: DashboardHomeProps) {
   const { theme } = useTheme();
+
+  // Fade-in on every tab focus
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useFocusEffect(useCallback(() => {
+    fadeAnim.setValue(0);
+    Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+  }, [fadeAnim]));
 
   const examDate  = String(lsGet("exam_date",  "2026-06-12") ?? "2026-06-12");
   const examType  = String(lsGet("exam_type",  "ЦТ") ?? "ЦТ");
@@ -106,6 +112,7 @@ export default function DashboardScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }}>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 
         {/* App title */}
@@ -121,10 +128,10 @@ export default function DashboardScreen({ navigation }: Props) {
 
         {/* Streak + today */}
         <View style={s.row2}>
-          <Card style={s.halfCard}>
-            <Text style={s.emoji}>{streak > 0 ? "🔥" : "💤"}</Text>
-            <Text style={[s.bold18, { color: theme.text }]}>{streak} {daysWord(streak)}</Text>
-            <Text style={[s.xs, { color: theme.muted }]}>Стрик</Text>
+          <Card style={[s.halfCard, { alignItems: "center" }]}>
+            <Text style={s.emoji}>🔥</Text>
+            <Text style={[s.bold18, { color: theme.text }]}>{streak}</Text>
+            <Text style={[s.xs, { color: theme.muted }]}>{daysWord(streak)} стрик</Text>
           </Card>
           <Card style={s.halfCard}>
             <Text style={[s.xs, { color: theme.muted, marginBottom: 6 }]}>Сегодня</Text>
@@ -189,6 +196,7 @@ export default function DashboardScreen({ navigation }: Props) {
         </View>
 
       </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }

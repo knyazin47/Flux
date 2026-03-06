@@ -28,6 +28,14 @@
       },
       "package": "com.flux.physics"
     },
+    "androidStatusBar": {
+      "translucent": false,
+      "backgroundColor": "#0F172A",
+      "barStyle": "light-content"
+    },
+    "androidNavigationBar": {
+      "visible": "leanback"
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },

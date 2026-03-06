@@ -1,33 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   View, Text, Switch, ScrollView, TouchableOpacity,
-  Modal, StyleSheet, Alert,
+  Modal, StyleSheet, Alert, Animated,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "@/context/ThemeContext";
 import { lsGet, lsSet } from "@/utils/storage";
 import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
+import { refreshNotifications, enableNotifications } from "@/utils/notifications";
+import { Slider } from "@/components/Slider";
 import type { SettingsHomeProps } from "@/navigation/types";
-
-// ── notifications ─────────────────────────────────────────────────────────────
-
-async function scheduleDaily(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Flux — время задач!",
-      body: "Не забудь выполнить дневную цель по физике.",
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 19,
-      minute: 0,
-    },
-  });
-}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -35,6 +19,12 @@ function formatGeneratedAt(iso: unknown): string {
   if (!iso || typeof iso !== "string") return "нет данных";
   const d = new Date(iso);
   return d.toLocaleString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function goalWord(n: number): string {
+  if (n % 10 === 1 && n % 100 !== 11) return "задача";
+  if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return "задачи";
+  return "задач";
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -70,14 +60,44 @@ function Row({ label, right, onPress, red }: { label: string; right?: React.Reac
 export default function SettingsScreen(_props: SettingsHomeProps) {
   const { theme, toggleTheme } = useTheme();
 
-  const [dailyGoal, setDailyGoal] = useState(() => String(lsGet("daily_goal", "10") ?? "10"));
+  // Fade-in on focus
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useFocusEffect(useCallback(() => {
+    fadeAnim.setValue(0);
+    Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+  }, [fadeAnim]));
+
+  const [dailyGoal, setDailyGoal] = useState(() => Number(lsGet("daily_goal", 10) ?? 10));
   const [notif,     setNotif]     = useState(() => lsGet("notif_enabled", false) === true || lsGet("notif_enabled", "false") === "true");
   const [resetModal, setResetModal] = useState(false);
 
   const questionsAt = formatGeneratedAt(lsGet(CACHE_GENERATED_AT_KEY, null));
-
   const examDate = String(lsGet("exam_date", "—") ?? "—");
   const examType = String(lsGet("exam_type",  "ЦТ") ?? "ЦТ");
+
+  const handleGoalChange = (v: number) => {
+    setDailyGoal(v);
+    lsSet("daily_goal", v);
+  };
+
+  const handleNotifToggle = async (v: boolean) => {
+    if (v) {
+      const granted = await enableNotifications();
+      if (!granted) {
+        Alert.alert("Нет доступа", "Разреши уведомления в настройках устройства.");
+        return;
+      }
+      setNotif(true);
+      lsSet("notif_enabled", true);
+      const todayDone = Number(lsGet("today_done", 0));
+      const goal = Number(lsGet("daily_goal", 10));
+      refreshNotifications(true, todayDone >= goal);
+    } else {
+      setNotif(false);
+      lsSet("notif_enabled", false);
+      refreshNotifications(false, false); // cancels all scheduled
+    }
+  };
 
   const handleReset = () => {
     AsyncStorage.clear().then(() => {
@@ -88,97 +108,92 @@ export default function SettingsScreen(_props: SettingsHomeProps) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 4, paddingBottom: 40 }}>
-        <Text style={[g.h1, { color: theme.text }]}>Настройки</Text>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 4, paddingBottom: 40 }}>
+          <Text style={[g.h1, { color: theme.text }]}>Настройки</Text>
 
-        {/* Внешний вид */}
-        <SectionHeader label="ВНЕШНИЙ ВИД" />
-        <Card>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14 }}>
-            <Text style={{ fontSize: 14, color: theme.text }}>Тёмная тема</Text>
-            <Switch
-              value={theme.dark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: theme.border, true: "#F97316" }}
-              thumbColor={theme.card}
-            />
-          </View>
-        </Card>
-
-        {/* Экзамен */}
-        <SectionHeader label="ЭКЗАМЕН" />
-        <Card>
-          <Row label={`Дата ${examType}`} right={<Text style={{ fontSize: 13, color: theme.muted }}>{examDate}</Text>} />
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14 }}>
-            <Text style={{ fontSize: 14, color: theme.text }}>Тип экзамена</Text>
-            <Text style={{ fontSize: 13, color: theme.muted }}>{examType}</Text>
-          </View>
-        </Card>
-
-        {/* Ежедневная цель */}
-        <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
-        <Card>
-          <View style={{ paddingVertical: 14, gap: 10 }}>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {["5", "10", "15"].map(g => (
-                <TouchableOpacity key={g} onPress={() => { setDailyGoal(g); lsSet("daily_goal", g); }}
-                  style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center",
-                    backgroundColor: dailyGoal === g ? "#F97316" : theme.bg,
-                    borderWidth: 1, borderColor: dailyGoal === g ? "#F97316" : theme.border }}>
-                  <Text style={{ fontWeight: "600", fontSize: 14, color: dailyGoal === g ? "#fff" : theme.muted }}>{g}</Text>
-                </TouchableOpacity>
-              ))}
+          {/* Внешний вид */}
+          <SectionHeader label="ВНЕШНИЙ ВИД" />
+          <Card>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14 }}>
+              <Text style={{ fontSize: 14, color: theme.text }}>Тёмная тема</Text>
+              <Switch
+                value={theme.dark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.border, true: "#F97316" }}
+                thumbColor={theme.card}
+              />
             </View>
-            <Text style={{ fontSize: 12, color: theme.muted, textAlign: "center" }}>{dailyGoal} задач ежедневно</Text>
-          </View>
-        </Card>
+          </Card>
 
-        {/* Уведомления */}
-        <SectionHeader label="УВЕДОМЛЕНИЯ" />
-        <Card>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14 }}>
-            <Text style={{ fontSize: 14, color: theme.text }}>Напоминания</Text>
-            <Switch
-              value={notif}
-              onValueChange={async v => {
-                if (v) {
-                  const { status } = await Notifications.requestPermissionsAsync();
-                  if (status !== "granted") {
-                    Alert.alert("Нет доступа", "Разреши уведомления в настройках устройства.");
-                    return;
-                  }
-                  scheduleDaily();
-                } else {
-                  Notifications.cancelAllScheduledNotificationsAsync();
-                }
-                setNotif(v);
-                lsSet("notif_enabled", v);
-              }}
-              trackColor={{ false: theme.border, true: "#F97316" }}
-              thumbColor={theme.card}
-            />
-          </View>
-        </Card>
+          {/* Экзамен */}
+          <SectionHeader label="ЭКЗАМЕН" />
+          <Card>
+            <Row label={`Дата ${examType}`} right={<Text style={{ fontSize: 13, color: theme.muted }}>{examDate}</Text>} />
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14 }}>
+              <Text style={{ fontSize: 14, color: theme.text }}>Тип экзамена</Text>
+              <Text style={{ fontSize: 13, color: theme.muted }}>{examType}</Text>
+            </View>
+          </Card>
 
-        {/* Вопросы */}
-        <SectionHeader label="ВОПРОСЫ" />
-        <Card>
-          <View style={{ paddingVertical: 14, gap: 2 }}>
-            <Text style={{ fontSize: 14, color: theme.text }}>Последнее обновление</Text>
-            <Text style={{ fontSize: 12, color: theme.muted }}>{questionsAt}</Text>
-          </View>
-        </Card>
+          {/* Ежедневная цель — слайдер 1–15 */}
+          <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
+          <Card>
+            <View style={{ paddingVertical: 14, gap: 4 }}>
+              <Text style={{ fontSize: 14, color: theme.text }}>Задач в день</Text>
+              <Slider
+                value={dailyGoal}
+                min={1}
+                max={15}
+                step={1}
+                onChange={handleGoalChange}
+                formatLabel={v => `${v} ${goalWord(v)} ежедневно`}
+                trackColor={theme.border}
+              />
+            </View>
+          </Card>
 
-        {/* Данные */}
-        <SectionHeader label="ДАННЫЕ" />
-        <Card>
-          <View style={{ borderBottomWidth: 0 }}>
-            <Row label="Сбросить весь прогресс" red onPress={() => setResetModal(true)} />
-          </View>
-        </Card>
+          {/* Уведомления */}
+          <SectionHeader label="УВЕДОМЛЕНИЯ" />
+          <Card>
+            <View style={{ paddingVertical: 14, gap: 8 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <Text style={{ fontSize: 14, color: theme.text }}>Напоминания</Text>
+                <Switch
+                  value={notif}
+                  onValueChange={handleNotifToggle}
+                  trackColor={{ false: theme.border, true: "#F97316" }}
+                  thumbColor={theme.card}
+                />
+              </View>
+              {notif && (
+                <Text style={{ fontSize: 12, color: theme.muted, lineHeight: 17 }}>
+                  Приходят в 12:00, 19:00 и 22:00 — только если дневная цель ещё не выполнена.
+                </Text>
+              )}
+            </View>
+          </Card>
 
-        <Text style={{ fontSize: 12, color: theme.muted, textAlign: "center", marginTop: 16 }}>Flux • v0.2.0</Text>
-      </ScrollView>
+          {/* Вопросы */}
+          <SectionHeader label="ВОПРОСЫ" />
+          <Card>
+            <View style={{ paddingVertical: 14, gap: 2 }}>
+              <Text style={{ fontSize: 14, color: theme.text }}>Последнее обновление</Text>
+              <Text style={{ fontSize: 12, color: theme.muted }}>{questionsAt}</Text>
+            </View>
+          </Card>
+
+          {/* Данные */}
+          <SectionHeader label="ДАННЫЕ" />
+          <Card>
+            <View style={{ borderBottomWidth: 0 }}>
+              <Row label="Сбросить весь прогресс" red onPress={() => setResetModal(true)} />
+            </View>
+          </Card>
+
+          <Text style={{ fontSize: 12, color: theme.muted, textAlign: "center", marginTop: 16 }}>Flux • v0.2.0</Text>
+        </ScrollView>
+      </Animated.View>
 
       {/* Reset modal */}
       <Modal visible={resetModal} transparent animationType="fade">

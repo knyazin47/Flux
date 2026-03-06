@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+### Frontend (run from `frontend/`)
+
 All commands run from the `frontend/` directory:
 
 ```bash
@@ -18,6 +20,25 @@ npm run preview    # preview production build locally
 ```
 
 No test suite is configured.
+
+### Mobile (run from `mobile/`)
+
+```bash
+cd mobile
+npm install          # install dependencies
+npm start            # start Expo dev server (Metro bundler)
+npm run android      # run on Android device/emulator (expo run:android)
+npm run ios          # run on iOS simulator (expo run:ios)
+npm run lint         # ESLint
+npm run typecheck    # TypeScript type-check (no emit)
+```
+
+**Building APK (no GMS/Google Play):**
+```bash
+# EAS Build — requires eas-cli and Expo account
+eas build --platform android --profile preview
+```
+The `preview` profile in `mobile/eas.json` produces an `.apk` (not `.aab`) suitable for sideloading on devices without Google Play Services (e.g. Huawei).
 
 ### Environment setup
 
@@ -51,7 +72,8 @@ node scripts/generate-daily.js
 - **UI Cleanliness:** Labels like "← Не знаю | Знаю →" are forbidden. Interface must remain minimalist.
 
 ### Versioning Protocol (SemVer)
-Maintain the version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION` export) — they must always match.
+**Web:** Maintain the version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION` export) — they must always match.
+**Mobile:** Version is tracked independently in `mobile/package.json` only.
 - **Patch (0.0.x):** Bug fixes, style tweaks, minor text edits.
 - **Minor (0.x.0):** New features, logic changes, new content modules.
 - **Major (x.0.0):** Breaking changes, rebranding, or complete architecture overhauls.
@@ -71,6 +93,7 @@ Maintain the version in **both** `frontend/package.json` and `frontend/src/versi
 ```
 flux/
   frontend/          # React PWA (Vite)
+  mobile/            # Expo React Native app (iOS + Android)
   api/
     generate.js      # Vercel Serverless Function — POST /api/generate (on-demand questions via Claude)
   data/
@@ -140,3 +163,34 @@ XP rewards: correct answer +10, daily goal +50, mock exam +100, streak 7 days +1
 Levels: Физик(0) → Механик(200) → Учёный(500) → Академик(1000) → Эпштейн(2000)
 Achievements: first_task, streak_7, answers_100, all_topics, perfect
 ```
+
+### Mobile architecture (Expo SDK 55)
+
+Stack: Expo SDK 55, React Native 0.83.2, React 19.2.0, TypeScript, React Navigation 7.
+
+**Entry & startup (`mobile/App.tsx`):** Calls `hydrateCache()` (AsyncStorage → in-memory) before rendering, then mounts `SafeAreaProvider > ThemeProvider > NavigationContainer > RootNavigator`. `checkAndUpdateStreak()` and `prefetchQuestions()` run once inside the inner component.
+
+**Theme (`mobile/src/context/ThemeContext.tsx`):** Provides a `theme` object with the same color tokens as the web CSS variables. Dark mode stored via AsyncStorage `"theme"` key.
+
+**Storage (`mobile/src/utils/storage.ts`):** AsyncStorage wrapper with an in-memory cache.
+- `hydrateCache()` — must be awaited at startup before any `lsGet` calls
+- `lsGet(key, fallback)` — synchronous read from cache
+- `lsSet(key, value)` — async write (updates cache + AsyncStorage)
+- Same function signatures as web `storage.js` for parity
+
+**Navigation (`mobile/src/navigation/index.tsx`):** 5-tab bottom navigator; each tab has its own `NativeStack`. Tab icons use `@expo/vector-icons` (Ionicons). No header shown on any screen (`headerShown: false` everywhere).
+
+**Screens (5 total, in `mobile/src/screens/`):**
+- `Dashboard` — countdown card, streak/XP grid, quick-access buttons, recent RT results
+- `Tasks` — FlatList MCQ session; saves/restores state via `tasks_session` AsyncStorage key
+- `FormulaCards` — SM-2 spaced repetition; `Animated` rotateY card flip; plain-text formula display (no LaTeX renderer)
+- `Progress` — 4 tabs (Статистика / Темы / РТ-ДРТ / Достижения) + `AddResultModal`
+- `Settings` — theme toggle, daily goal picker, push notification scheduling, `AsyncStorage.clear()` reset
+
+**Daily questions:** Fetched from `https://flux-training.vercel.app/daily-questions.json` (configured in `mobile/src/config.ts`). Same cache structure and invalidation logic as the web app.
+
+**Formula data:** `mobile/src/data/formulas.json` is a copy of `data/formulas.json`. If the master database changes, copy it again.
+
+**No GMS constraint:** No Firebase, FCM, or any Google SDK. Push notifications use `expo-notifications` local scheduling only. `app.json` has `"googleServicesFile": null`. The EAS `preview` profile builds a sideloadable `.apk`.
+
+**Module aliases:** `@/` maps to `mobile/src/` (configured via `babel-plugin-module-resolver` in `babel.config.js` and `tsconfig.json` paths).
