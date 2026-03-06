@@ -54,6 +54,7 @@ const PERSISTED_KEYS = [
   "theme",
   "streak_days",
   "streak_last_date",
+  "streak_active_date",
   "xp_total",
   "today_xp",
   "today_done",
@@ -105,6 +106,8 @@ function yesterdayStr(): string {
 }
 
 // ── Streak ────────────────────────────────────────────────────────────────
+// streak_active_date — дата, когда пользователь выполнил ≥1 задание.
+// Стрик +1 только если вчера огонёк был зажжён (activeDate === вчера).
 
 export async function checkAndUpdateStreak(): Promise<void> {
   const today = todayStr();
@@ -115,7 +118,8 @@ export async function checkAndUpdateStreak(): Promise<void> {
   await lsSet("today_done", 0);
   await lsSet("today_xp", 0);
 
-  if (lastDate === yesterdayStr()) {
+  const activeDate = (await lsGetAsync("streak_active_date", null)) as string | null;
+  if (activeDate === yesterdayStr()) {
     await lsSet("streak_days", Number(lsGet("streak_days", 0)) + 1);
   } else if (lastDate !== null) {
     await lsSet("streak_days", 0);
@@ -147,6 +151,12 @@ export async function addXP(amount: number): Promise<number> {
 export async function incrementTodayDone(count = 1): Promise<number> {
   const done = Number(lsGet("today_done", 0)) + count;
   await lsSet("today_done", done);
+
+  // Первое задание дня — фиксируем активный день для стрика
+  if (done >= 1) {
+    await lsSet("streak_active_date", todayStr());
+  }
+
   const goal = Number(lsGet("daily_goal", 10));
   if (done === goal) {
     await addXP(XP_REWARDS.daily_task_set);

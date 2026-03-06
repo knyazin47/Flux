@@ -12,4 +12,5 @@
 //          Tasks uses daily_goal, settings slider, copy toast, exam date 2026-06-05
 //   1.6.1  Settings cleanup (no emojis, no time picker, slider style), Tasks/Theory
 //          dropdown+mode selector, Progress stat cards centered, RT table "Заметки"
-export const APP_VERSION = "1.6.1";
+//   1.6.2  Fix streak: increment only when flame lit (≥1 task done), not on app open
+export const APP_VERSION = "1.6.2";

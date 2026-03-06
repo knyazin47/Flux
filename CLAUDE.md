@@ -141,6 +141,8 @@ The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6
 - `topic_stats` - `{ [topic]: { correct, total } }`
 - `achievements` - `[{ id, unlockedAt }]`
 - `rt_results` - RT/DRT exam history
+- `exam_date` - ISO date string, default `"2026-06-05"`
+- `exam_type` - `"ЦТ"` | `"ЦЭ"`
 - `tasks_session`, `theory_session` - in-progress session state (for resume)
 - `daily_questions_data`, `daily_questions_date` - cached daily questions
 
@@ -168,7 +170,7 @@ Achievements: first_task, streak_7, answers_100, all_topics, perfect
 
 Stack: Expo SDK 55, React Native 0.83.2, React 19.2.0, TypeScript, React Navigation 7.
 
-**Entry & startup (`mobile/App.tsx`):** Calls `hydrateCache()` (AsyncStorage → in-memory) before rendering, then mounts `SafeAreaProvider > ThemeProvider > NavigationContainer > RootNavigator`. `checkAndUpdateStreak()` and `prefetchQuestions()` run once inside the inner component.
+**Entry & startup (`mobile/App.tsx`):** Shows a loading spinner while `hydrateCache()` completes, then mounts `SafeAreaProvider > ThemeProvider > NavigationContainer > RootNavigator`. Inside the inner component, `checkAndUpdateStreak()`, `prefetchQuestions()`, and `refreshNotifications()` run on mount; `refreshNotifications()` is also called whenever the app returns to foreground (`AppState`). If `prefetchQuestions()` throws `"no_cache"` (first launch, no internet), a full-screen overlay blocks the UI with a retry button.
 
 **Theme (`mobile/src/context/ThemeContext.tsx`):** Provides a `theme` object with the same color tokens as the web CSS variables. Dark mode stored via AsyncStorage `"theme"` key.
 
@@ -178,9 +180,11 @@ Stack: Expo SDK 55, React Native 0.83.2, React 19.2.0, TypeScript, React Navigat
 - `lsSet(key, value)` — async write (updates cache + AsyncStorage)
 - Same function signatures as web `storage.js` for parity
 
+**Notifications (`mobile/src/utils/notifications.ts`):** `refreshNotifications(enabled, goalMet)` — cancels all scheduled notifications then re-schedules a daily reminder if `enabled && !goalMet`. Called on app mount and on foreground resume.
+
 **Navigation (`mobile/src/navigation/index.tsx`):** 5-tab bottom navigator; each tab has its own `NativeStack`. Tab icons use `@expo/vector-icons` (Ionicons). No header shown on any screen (`headerShown: false` everywhere).
 
-**Screens (5 total, in `mobile/src/screens/`):**
+**Screens (5 in tab nav, in `mobile/src/screens/`):** (`FirstRun/` exists as a file but is not wired into navigation — the no-internet gate is handled inline in App.tsx instead.)
 - `Dashboard` — countdown card, streak/XP grid, quick-access buttons, recent RT results
 - `Tasks` — FlatList MCQ session; saves/restores state via `tasks_session` AsyncStorage key
 - `FormulaCards` — SM-2 spaced repetition; `Animated` rotateY card flip; plain-text formula display (no LaTeX renderer)
