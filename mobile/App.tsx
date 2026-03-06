@@ -9,20 +9,24 @@ import { RootNavigator } from "@/navigation";
 import { hydrateCache, checkAndUpdateStreak } from "@/utils/storage";
 import { prefetchQuestions } from "@/utils/generateQuestions";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+} catch (e) {
+  console.warn("Notifications.setNotificationHandler failed:", e);
+}
 
 function AppInner() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    checkAndUpdateStreak();
+    checkAndUpdateStreak().catch((e) => console.warn("streak:", e));
     prefetchQuestions().catch((err: Error) => {
       console.warn("prefetchQuestions:", err.message);
     });
@@ -40,7 +44,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    hydrateCache().finally(() => setReady(true));
+    hydrateCache().catch((e) => console.warn("hydrateCache:", e)).finally(() => setReady(true));
   }, []);
 
   if (!ready) {

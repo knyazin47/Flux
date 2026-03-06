@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F172A"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.flux.physics",
@@ -24,22 +26,18 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F172A"
       },
-      "package": "com.flux.physics",
-      "minSdkVersion": 29,
-      "googleServicesFile": null
+      "package": "com.flux.physics"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#F97316",
-          "androidMode": "default"
-        }
-      ]
-    ]
+      "expo-notifications"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "acd3e3f6-e845-4393-8635-6dde5266336a"
+      }
+    }
   }
 }
