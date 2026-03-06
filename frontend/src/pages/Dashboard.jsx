@@ -94,7 +94,7 @@ export default function Dashboard() {
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <FlameIcon active={todayDone >= 1} size={36} />
           <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
-          <p className="text-xs" style={{ color: "var(--muted)" }}>Стрик</p>
+          <p className="text-xs" style={{ color: "var(--muted)" }}>Серия</p>
         </div>
 
         {/* Today's progress */}

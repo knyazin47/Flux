@@ -19,7 +19,7 @@ type Tab = typeof TABS[number];
 
 const ACHIEVEMENTS_DEF = [
   { id: "first_task",  emoji: "🚀", name: "Старт",    desc: "Первое задание" },
-  { id: "streak_7",    emoji: "🔥", name: "Неделя",   desc: "Стрик 7 дней" },
+  { id: "streak_7",    emoji: "🔥", name: "Неделя",   desc: "Серия 7 дней" },
   { id: "answers_100", emoji: "💯", name: "Сотня",    desc: "100 верных ответов" },
   { id: "all_topics",  emoji: "📚", name: "Все темы", desc: "Все 9 тем" },
   { id: "perfect",     emoji: "🎯", name: "Отличник", desc: "100% в тесте" },
@@ -121,7 +121,7 @@ export default function ProgressScreen(_props: ProgressHomeProps) {
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
             {[
               { icon: "⚡", val: String(totalXP),    label: "Всего XP" },
-              { icon: "🔥", val: String(streak),      label: "Текущий стрик" },
+              { icon: "🔥", val: String(streak),      label: "Текущая серия" },
               { icon: "📝", val: String(totalAnswers), label: "Ответов дано" },
               { icon: "✓",  val: `${accuracy}%`,      label: "Верных ответов" },
             ].map(s => (

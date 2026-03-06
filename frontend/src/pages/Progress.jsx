@@ -24,7 +24,7 @@ function loadTopicStats() {
 }
 
 const ACHIEVEMENTS = [
-  { emoji: "🔥", name: "Неостановимый", desc: "Стрик 7 дней", unlocked: false },
+  { emoji: "🔥", name: "Неостановимый", desc: "Серия 7 дней", unlocked: false },
   { emoji: "⚡", name: "Скоростной", desc: "10 верных за 5 мин", unlocked: false },
   { emoji: "📚", name: "Все темы", desc: "Все 9 тем", unlocked: false },
   { emoji: "🎯", name: "Отличник", desc: "100% в тесте", unlocked: false },
@@ -141,7 +141,7 @@ export default function Progress() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: "⚡", val: totalXP, label: "Всего XP" },
-              { icon: "🔥", val: streak, label: "Текущий стрик" },
+              { icon: "🔥", val: streak, label: "Текущая серия" },
               { icon: "📝", val: totalAnswers, label: "Ответов дано" },
               { icon: "✓", val: `${accuracy}%`, label: "Верных ответов" },
             ].map(s => (

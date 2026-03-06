@@ -12,7 +12,6 @@ import {
 } from "@/utils/storage";
 import { generateQuestions } from "@/utils/generateQuestions";
 import { refreshNotifications } from "@/utils/notifications";
-import { Slider } from "@/components/Slider";
 import type { TasksHomeProps } from "@/navigation/types";
 
 // ── constants ─────────────────────────────────────────────────────────────────
@@ -105,7 +104,6 @@ export default function TasksScreen({ navigation }: TasksHomeProps) {
 
   const [view, setView]               = useState<"start" | "loading" | "question" | "results">("start");
   const [activeTopic, setActiveTopic] = useState("Все");
-  const [sessionCount, setSessionCount] = useState(10);
   const [timerDuration, setTimerD]    = useState(0);
   const [questions, setQuestions]     = useState<Question[]>([]);
   const [qIndex, setQIndex]           = useState(0);
@@ -121,6 +119,7 @@ export default function TasksScreen({ navigation }: TasksHomeProps) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const dailyGoal = Number(lsGet("daily_goal", 10));
+  const sessionCount = dailyGoal;
   const todayDone = Number(lsGet("today_done", 0));
 
   useEffect(() => {
@@ -147,7 +146,7 @@ export default function TasksScreen({ navigation }: TasksHomeProps) {
       sessionCount, currentSelected: selected, ...overrides,
     };
     lsSet("tasks_session", snap);
-  }, [questions, qIndex, answers, timerDuration, activeTopic, sessionCount, selected]);
+  }, [questions, qIndex, answers, timerDuration, activeTopic, selected]);
 
   const continueSession = async () => {
     const raw = await lsGetAsync("tasks_session") as SessionData | null;
@@ -157,7 +156,6 @@ export default function TasksScreen({ navigation }: TasksHomeProps) {
     setAnswers(raw.answers || []);
     setTimerD(raw.timerDuration || 0);
     setActiveTopic(raw.activeTopic || "Все");
-    setSessionCount(raw.sessionCount || 10);
     setSelected(raw.currentSelected ?? null);
     setTimeLeft(raw.timerDuration || 0);
     setView("question");
@@ -462,20 +460,6 @@ export default function TasksScreen({ navigation }: TasksHomeProps) {
               ))}
             </View>
           </ScrollView>
-
-          {/* Question count slider (1–15) */}
-          <View style={{ backgroundColor: theme.card, borderRadius: 16, borderWidth: 1, borderColor: theme.border, padding: 16, gap: 4 }}>
-            <Text style={{ fontSize: 13, color: theme.muted }}>Количество вопросов</Text>
-            <Slider
-              value={sessionCount}
-              min={1}
-              max={15}
-              step={1}
-              onChange={setSessionCount}
-              formatLabel={v => `${v} ${questionWord(v)}`}
-              trackColor={theme.border}
-            />
-          </View>
 
           {/* Timer selector */}
           <View style={{ gap: 6 }}>

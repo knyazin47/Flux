@@ -60,7 +60,14 @@ export default function SettingsPage() {
   const [syncCodeInput, setSyncCodeInput] = useState("");
   const [syncError, setSyncError] = useState("");
   const [syncSuccess, setSyncSuccess] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
   const questionsUpdatedAt = formatGeneratedAt(localStorage.getItem(CACHE_GENERATED_AT_KEY));
+
+  const handleCopyCode = () => {
+    navigator.clipboard?.writeText(syncCode);
+    setCopiedToast(true);
+    setTimeout(() => setCopiedToast(false), 2000);
+  };
 
   const resetSync = () => {
     setModal(null);
@@ -188,10 +195,10 @@ export default function SettingsPage() {
               </p>
               <p className="text-xs text-center" style={{ color: "var(--muted)" }}>Действует 30 дней</p>
               <button
-                onClick={() => navigator.clipboard?.writeText(syncCode)}
+                onClick={handleCopyCode}
                 className="w-full py-3 rounded-2xl text-sm font-bold text-white"
-                style={{ background: "#F97316" }}>
-                Скопировать код
+                style={{ background: copiedToast ? "#22C55E" : "#F97316", transition: "background 0.2s" }}>
+                {copiedToast ? "Скопировано!" : "Скопировать код"}
               </button>
             </>
           )}
@@ -260,7 +267,7 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm" style={{ color: "var(--muted)" }}>Задач ежедневно</p>
-          <p className="text-sm font-bold" style={{ color: "#F97316" }}>{dailyGoal}</p>
+          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>{dailyGoal}</p>
         </div>
         <input
           type="range" min={1} max={15} value={dailyGoal}

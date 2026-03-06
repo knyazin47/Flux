@@ -132,7 +132,7 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
           <Card style={[s.halfCard, { alignItems: "center" }]}>
             <FlameIcon active={todayDone >= 1} size={34} />
             <Text style={[s.bold18, { color: theme.text, marginTop: 4 }]}>{streak}</Text>
-            <Text style={[s.xs, { color: theme.muted }]}>{daysWord(streak)} стрик</Text>
+            <Text style={[s.xs, { color: theme.muted }]}>Серия</Text>
           </Card>
           <Card style={s.halfCard}>
             <Text style={[s.xs, { color: theme.muted, marginBottom: 6 }]}>Сегодня</Text>

@@ -7,7 +7,7 @@ import * as Notifications from "expo-notifications";
 const SLOTS = [
   { hour: 12, minute: 0, body: "Пора заняться физикой! Выполни дневное задание." },
   { hour: 19, minute: 0, body: "Ещё не сделал задания? Самое время позаниматься!" },
-  { hour: 22, minute: 0, body: "Последний шанс! Не потеряй стрик." },
+  { hour: 22, minute: 0, body: "Последний шанс! Не потеряй серию." },
 ];
 
 /**

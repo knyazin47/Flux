@@ -8,4 +8,6 @@
 //   1.5.0  SettingsPage updates, cache metadata requirement, GitHub link
 //   1.5.1  Fix AI language bug (Belarusian→Russian), README branding corrections
 //   1.5.2  Fix CI: git pull--rebase before push; log claude stderr; switch --print to -p
-export const APP_VERSION = "1.5.2";
+//   1.6.0  FlameIcon SVG (active/gray), remove Onboarding, MSK streak, "Серия",
+//          Tasks uses daily_goal, settings slider, copy toast, exam date 2026-06-05
+export const APP_VERSION = "1.6.0";
