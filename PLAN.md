@@ -93,11 +93,31 @@
 - [ ] Window size constraints matching mobile layout
 - [ ] File-system access for export (PDF progress reports)
 
-### Mobile (Capacitor — iOS + Android native shell)
-- [ ] `npx cap init`; configure `capacitor.config.ts`
-- [ ] iOS target: Xcode build, TestFlight distribution
-- [ ] Android target: Android Studio build, internal testing track
-- [ ] Native push notifications via Capacitor Push Notifications plugin
+### Mobile (React Native + Expo — replaces Capacitor plan)
+
+#### Phase M1 — Scaffold (complete)
+- [x] `mobile/` directory: Expo SDK 55 managed workflow, TypeScript template
+- [x] Bottom tab navigator (5 tabs: Главная, Задачи, Формулы, Прогресс, Настройки) + per-tab stack navigators
+- [x] ThemeContext with dark/light support, identical color tokens to web CSS vars
+- [x] AsyncStorage wrapper (`mobile/src/utils/storage.ts`) — same function signatures as web `storage.js`
+- [x] `generateQuestions.ts` adapter — fetches same `/daily-questions.json`, same API as web
+- [x] `app.json`: Android minSdkVersion 29, iOS MinimumOSVersion 26.2, no GMS dependencies
+- [x] Empty placeholder screens for all 5 tabs (content ported in M2)
+
+#### Phase M2 — Screen ports (complete)
+- [x] Port Dashboard screen: countdown, streak/XP cards, quick access grid, recent results
+- [x] Port Tasks screen: FlatList answer options, session save/restore, XP/stats writes, results view
+- [x] Port FormulaCards screen: SM-2 spaced repetition, Animated card flip, 3 tabs (По темам, Повторение, Сложные)
+- [x] Port Progress screen: 4 tabs (Статистика, Темы, РТ/ДРТ, Достижения), AddResultModal, activity chart
+- [x] Port Settings screen: dark theme toggle, daily goal picker, notifications switch, reset
+- [x] Plain-text formula display (react-native-math-view available as optional upgrade in M3)
+- [x] TypeScript passes clean, Metro bundler starts without errors
+
+#### Phase M3 — Polish & Build (pending)
+- [ ] Replace placeholder text icons in tab bar with vector icons (react-native-vector-icons or @expo/vector-icons)
+- [ ] LaTeX rendering upgrade via react-native-math-view (optional)
+- [ ] Local push notifications via expo-notifications (no GMS)
+- [ ] APK build for Huawei PPA-LX1 sideload
 
 ---
 
