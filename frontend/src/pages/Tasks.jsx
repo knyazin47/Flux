@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Card from "@/components/ui/Card";
 import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { X, Check, Star } from "lucide-react";
+import { X, Check, Star, ChevronDown } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
@@ -14,7 +14,7 @@ function TeX({ formula }) {
 }
 
 const TOPICS_FILTER = [
-  "Все", "Механика", "Молекулярная физика", "Термодинамика",
+  "Все темы", "Механика", "Молекулярная физика", "Термодинамика",
   "Электростатика", "Постоянный ток", "Электромагнетизм",
   "Колебания и волны", "Оптика", "Квантовая и ядерная физика",
 ];
@@ -51,7 +51,9 @@ const formatTime = (s) =>
 
 export default function Tasks() {
   const [view, setView]               = useState("start");
-  const [activeTopic, setActiveTopic] = useState("Все");
+  const [activeTopic, setActiveTopic] = useState("Все темы");
+  const [topicOpen, setTopicOpen]     = useState(false);
+  const [mode, setMode]               = useState("topic");
   const [timerDuration, setTimerDuration] = useState(0);
   const [sessionQuestions, setSessionQ]  = useState([]);
   const [qIndex, setQIndex]           = useState(0);
@@ -134,12 +136,13 @@ export default function Tasks() {
     setLoadError(null);
     localStorage.removeItem("tasks_session");
     try {
-      const topic = activeTopic === "Все"
+      const topic = activeTopic === "Все темы"
         ? TOPICS_FILTER[Math.floor(Math.random() * (TOPICS_FILTER.length - 1)) + 1]
         : activeTopic;
       const qs = await generateQuestions(topic, sessionCount, 2);
       if (qs.length === 0) throw new Error("Нет вопросов");
-      setSessionQ(qs);
+      const pool = mode === "random" ? [...qs].sort(() => Math.random() - 0.5) : qs;
+      setSessionQ(pool);
       setQIndex(0);
       setSelected(null);
       setAnswers([]);
@@ -267,16 +270,41 @@ export default function Tasks() {
             </div>
           </Card>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {TOPICS_FILTER.map((t) => (
-              <button key={t} onClick={() => setActiveTopic(t)}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
+          <div className="relative">
+            <button onClick={() => setTopicOpen((o) => !o)}
+              className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium"
+              style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--text)" }}>
+              {activeTopic}
+              <ChevronDown size={16} style={{ color: "var(--muted)" }} />
+            </button>
+            {topicOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 rounded-2xl overflow-hidden z-20 shadow-xl"
+                style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+                {TOPICS_FILTER.map((t) => (
+                  <button key={t} onClick={() => { setActiveTopic(t); setTopicOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-sm border-b last:border-0 transition-colors"
+                    style={{
+                      borderColor: "var(--border)",
+                      color: t === activeTopic ? "#F97316" : "var(--text)",
+                      background: t === activeTopic ? "#FFF7ED" : "var(--card)",
+                    }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            {[{ id: "topic", label: "По теме" }, { id: "random", label: "Случайные" }].map((m) => (
+              <button key={m.id} onClick={() => setMode(m.id)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
                 style={{
-                  background: activeTopic === t ? "#F97316" : "var(--card)",
-                  color: activeTopic === t ? "#fff" : "var(--muted)",
-                  border: `1px solid ${activeTopic === t ? "#F97316" : "var(--border)"}`,
+                  background: mode === m.id ? "#F97316" : "var(--card)",
+                  color: mode === m.id ? "#fff" : "var(--muted)",
+                  border: `1px solid ${mode === m.id ? "#F97316" : "var(--border)"}`,
                 }}>
-                {t}
+                {m.label}
               </button>
             ))}
           </div>

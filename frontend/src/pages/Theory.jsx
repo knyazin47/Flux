@@ -418,7 +418,7 @@ export default function Theory() {
         </div>
 
         <div className="flex gap-2">
-          {[{ id: "topic", label: "📚 По теме" }, { id: "random", label: "🎲 Случайные" }].map((m) => (
+          {[{ id: "topic", label: "По теме" }, { id: "random", label: "Случайные" }].map((m) => (
             <button key={m.id} onClick={() => setMode(m.id)}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{

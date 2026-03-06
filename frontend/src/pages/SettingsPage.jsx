@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { X, ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 import { APP_VERSION } from "@/version";
 import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
 
@@ -53,8 +53,7 @@ export default function SettingsPage() {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [dailyGoal, setDailyGoal] = useState(localStorage.getItem("daily_goal") || "10");
   const [notif, setNotif] = useState(localStorage.getItem("notif_enabled") === "true");
-  const [notifTime, setNotifTime] = useState(localStorage.getItem("notif_time") || "20:00");
-  const [modal, setModal] = useState(null); // reset | time | sync-save | sync-load
+  const [modal, setModal] = useState(null); // reset | sync-save | sync-load
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncCode, setSyncCode] = useState("");
   const [syncCodeInput, setSyncCodeInput] = useState("");
@@ -152,15 +151,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-1 p-4">
-      {modal === "time" && (
-        <Modal title="Время напоминания" onClose={() => setModal(null)}>
-          <input type="time" value={notifTime}
-            onChange={e => { setNotifTime(e.target.value); save("notif_time", e.target.value); }}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }} />
-          <button onClick={() => setModal(null)} className="w-full py-3 rounded-2xl text-sm font-bold text-white" style={{ background: "#F97316" }}>Готово</button>
-        </Modal>
-      )}
       {modal === "reset" && (
         <Modal title="Сбросить прогресс?" onClose={() => setModal(null)}>
           <p className="text-sm" style={{ color: "var(--muted)" }}>Все данные будут удалены. Это действие нельзя отменить.</p>
@@ -266,26 +256,24 @@ export default function SettingsPage() {
       <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
       <Card>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm" style={{ color: "var(--muted)" }}>Задач ежедневно</p>
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>{dailyGoal}</p>
+          <p className="text-sm font-semibold" style={{ color: "#F97316" }}>Задач ежедневно</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>{dailyGoal}</p>
         </div>
         <input
           type="range" min={1} max={15} value={dailyGoal}
+          className="slider-muted"
           onChange={e => { setDailyGoal(e.target.value); save("daily_goal", e.target.value); }}
-          style={{ width: "100%", accentColor: "#F97316" }}
+          style={{ width: "100%" }}
         />
       </Card>
 
       {/* Уведомления */}
       <SectionHeader label="УВЕДОМЛЕНИЯ" />
       <Card className="!py-0 !px-4">
-        <div className="flex items-center justify-between py-3.5 border-b" style={{ borderColor: notif ? "var(--border)" : "transparent" }}>
+        <div className="flex items-center justify-between py-3.5">
           <span className="text-sm" style={{ color: "var(--text)" }}>🔔 Напоминания</span>
           <Switch checked={notif} onCheckedChange={v => { setNotif(v); save("notif_enabled", v); }} />
         </div>
-        {notif && (
-          <SettingRow left="⏰ Время" right={<>{notifTime}<ChevronRight size={14} /></>} onClick={() => setModal("time")} />
-        )}
       </Card>
 
       {/* Синхронизация */}
