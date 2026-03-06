@@ -51,7 +51,7 @@ node scripts/generate-daily.js
 - **UI Cleanliness:** Labels like "← Не знаю | Знаю →" are forbidden. Interface must remain minimalist.
 
 ### Versioning Protocol (SemVer)
-Maintain the version in `frontend/package.json` and sync it with the UI:
+Maintain the version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION` export) — they must always match.
 - **Patch (0.0.x):** Bug fixes, style tweaks, minor text edits.
 - **Minor (0.x.0):** New features, logic changes, new content modules.
 - **Major (x.0.0):** Breaking changes, rebranding, or complete architecture overhauls.
@@ -121,7 +121,7 @@ The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6
 - `tasks_session`, `theory_session` - in-progress session state (for resume)
 - `daily_questions_data`, `daily_questions_date` - cached daily questions
 
-**Daily questions:** Fetched from `/daily-questions.json` (served as static asset), cached in localStorage per day. Structure: `{ date, questions: { [topic]: { 1: [...], 2: [...] } } }` where keys 1/2 are difficulty levels.
+**Daily questions:** Fetched from `/daily-questions.json` (served as static asset), cached in localStorage per day. Structure: `{ date, generated_at, questions: { [topic]: { 1: [...], 2: [...] } } }` where keys 1/2 are difficulty levels. Cache is invalidated if `generated_at` metadata is missing. The fetch/cache logic lives in `src/utils/generateQuestions.js`; `prefetchQuestions()` is called once on Layout mount.
 
 **Formula data:** `data/formulas.json` is the master database. Each formula has `id`, `name`, `formula` (text), `latex`, `units`, `subtopic`, `variables`, `difficulty`, `starred`. Loaded directly into FormulaCards and Cheatsheet pages.
 

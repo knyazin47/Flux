@@ -3,7 +3,7 @@
 ## Phase 1 — Foundation (complete)
 
 - [x] Project scaffold: React 18 + Vite + Tailwind + shadcn/ui
-- [x] 9 pages with full UI: Onboarding, Dashboard, Tasks, Theory, FormulaCards, Cheatsheet, MockExam, Progress, Settings
+- [x] 10 pages with full UI: Onboarding, Dashboard, Tasks, Theory, FormulaCards, Cheatsheet, MockExam, Progress, Settings, ActiveSessions
 - [x] Layout shell: sticky header, fixed bottom nav, dark/light theme
 - [x] localStorage state layer: XP, streak, topic stats, achievements
 - [x] KaTeX formula rendering
@@ -32,33 +32,35 @@
 
 ---
 
-## Phase 3 — Real Question Data (next)
+## Phase 3 — Real Question Data (complete)
 
 ### 3.1 Connect daily-questions.json to Tasks
 
-- [ ] Parse `frontend/public/daily-questions.json` in Tasks.jsx
-- [ ] Cache in localStorage with 24h TTL (`daily_questions_data`, `daily_questions_date`)
-- [ ] Fallback to cached data when offline
+- [x] Parse `frontend/public/daily-questions.json` in Tasks.jsx via `generateQuestions.js`
+- [x] Cache in localStorage with 24h TTL (`daily_questions_data`, `daily_questions_date`)
+- [x] Fallback to cached data when offline; require `generated_at` metadata for cache validity
 
 ### 3.2 Wire localStorage writes on session completion
 
-- [ ] Tasks: `addXP`, `incrementTodayDone`, `updateTopicStats`, `checkAchievements`, `checkAndUpdateStreak`
-- [ ] Theory: same as Tasks
-- [ ] MockExam: save result to `rt_results`, award XP, update `topic_stats`
+- [x] Tasks: `addXP`, `incrementTodayDone`, `updateTopicStats`, `checkAchievements`
+- [x] Theory: same as Tasks (`addXP`, `incrementTodayDone`, `updateTopicStats`, `checkAchievements`)
+- [x] MockExam: save result to `rt_results`, award XP, update `topic_stats`
 
-### 3.3 Real question bank for Theory and MockExam
+### 3.3 Question bank for Theory and MockExam
 
-- [ ] Expand CI generator to produce topic-specific theory questions
-- [ ] Separate JSON structure or embedded in `daily-questions.json`
+- [x] Both Tasks and Theory pull from `daily-questions.json` via `generateQuestions(topic, count, difficulty)`
+- [x] CI generates difficulty 1 (theory) and difficulty 2 (tasks) batches for all 9 topics
 
 ### 3.4 Onboarding → localStorage
 
-- [ ] Save `exam_date`, `exam_type`, `daily_goal` on "Начать"
-- [ ] Redirect to Dashboard; skip Onboarding if `onboarding_done` is set
+- [x] Save `exam_date`, `exam_type`, `daily_goal` on "Начать"
+- [x] Redirect to Dashboard; skip Onboarding if `onboarding_complete` is set
 
 ### 3.5 Settings → localStorage
 
-- [ ] Save all settings fields on change (currently UI-only)
+- [x] All settings fields persist to localStorage on change
+
+---
 
 ---
 

@@ -61,15 +61,17 @@ See [`frontend/.env.example`](frontend/.env.example) for all required and option
 ## Project Structure
 
 ```
-Physics/
+flux/
   frontend/            # React PWA (Vite)
     src/
-      pages/           # One file per screen (9 pages)
+      pages/           # One file per screen (10 pages)
       components/      # Shared UI components
       utils/           # localStorage helpers, XP logic
       lib/             # Routing helpers, auth stub
       api/             # No-op API client stub
     public/            # Static assets, daily-questions.json
+  api/
+    generate.js        # Vercel Serverless Function — POST /api/generate
   data/
     formulas.json      # Master formula database (LaTeX + metadata)
   scripts/

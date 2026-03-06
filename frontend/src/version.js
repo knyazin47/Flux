@@ -5,4 +5,6 @@
 //   1.2.0  De-branding, documentation, .gitignore, .env.example
 //   1.3.0  UI refinement, active-recall flashcard fix, versioning system
 //   1.4.0  Rebranding to Flux, icon set, manifest fix
-export const APP_VERSION = "1.4.0";
+//   1.5.0  SettingsPage updates, cache metadata requirement, GitHub link
+//   1.5.1  Fix AI language bug (Belarusian→Russian), README branding corrections
+export const APP_VERSION = "1.5.1";
