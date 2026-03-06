@@ -3,10 +3,20 @@ import { View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import * as Notifications from "expo-notifications";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { RootNavigator } from "@/navigation";
 import { hydrateCache, checkAndUpdateStreak } from "@/utils/storage";
 import { prefetchQuestions } from "@/utils/generateQuestions";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 function AppInner() {
   const { theme } = useTheme();

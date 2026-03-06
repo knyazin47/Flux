@@ -4,11 +4,30 @@ import {
   Modal, StyleSheet, Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
 import { lsGet, lsSet } from "@/utils/storage";
 import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
 import type { SettingsHomeProps } from "@/navigation/types";
+
+// ── notifications ─────────────────────────────────────────────────────────────
+
+async function scheduleDaily(): Promise<void> {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Flux — время задач!",
+      body: "Не забудь выполнить дневную цель по физике.",
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: 19,
+      minute: 0,
+    },
+  });
+}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -121,7 +140,20 @@ export default function SettingsScreen(_props: SettingsHomeProps) {
             <Text style={{ fontSize: 14, color: theme.text }}>Напоминания</Text>
             <Switch
               value={notif}
-              onValueChange={v => { setNotif(v); lsSet("notif_enabled", v); }}
+              onValueChange={async v => {
+                if (v) {
+                  const { status } = await Notifications.requestPermissionsAsync();
+                  if (status !== "granted") {
+                    Alert.alert("Нет доступа", "Разреши уведомления в настройках устройства.");
+                    return;
+                  }
+                  scheduleDaily();
+                } else {
+                  Notifications.cancelAllScheduledNotificationsAsync();
+                }
+                setNotif(v);
+                lsSet("notif_enabled", v);
+              }}
               trackColor={{ false: theme.border, true: "#F97316" }}
               thumbColor={theme.card}
             />

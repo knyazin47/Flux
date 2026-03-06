@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useTheme } from "@/context/ThemeContext";
 import {
@@ -69,10 +69,11 @@ function SettingsNavigator() {
 }
 
 // ── Tab icon helper ────────────────────────────────────────────────────────
-// Placeholder text icons — replace with vector icons in M2.
 
-function TabIcon({ label, color }: { label: string; color: string }) {
-  return <Text style={{ fontSize: 20, color }}>{label}</Text>;
+type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
+
+function TabIcon({ name, focused, color }: { name: IoniconName; focused: boolean; color: string }) {
+  return <Ionicons name={focused ? name : `${name}-outline` as IoniconName} size={22} color={color} />;
 }
 
 // ── Root tab navigator ─────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ export function RootNavigator() {
         component={DashboardNavigator}
         options={{
           tabBarLabel: "Главная",
-          tabBarIcon: ({ color }) => <TabIcon label="🏠" color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="home" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
@@ -107,7 +108,7 @@ export function RootNavigator() {
         component={TasksNavigator}
         options={{
           tabBarLabel: "Задачи",
-          tabBarIcon: ({ color }) => <TabIcon label="📝" color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="book" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
@@ -115,7 +116,7 @@ export function RootNavigator() {
         component={FormulasNavigator}
         options={{
           tabBarLabel: "Формулы",
-          tabBarIcon: ({ color }) => <TabIcon label="∑" color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="flask" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
@@ -123,7 +124,7 @@ export function RootNavigator() {
         component={ProgressNavigator}
         options={{
           tabBarLabel: "Прогресс",
-          tabBarIcon: ({ color }) => <TabIcon label="📊" color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="bar-chart" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
@@ -131,7 +132,7 @@ export function RootNavigator() {
         component={SettingsNavigator}
         options={{
           tabBarLabel: "Настройки",
-          tabBarIcon: ({ color }) => <TabIcon label="⚙" color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="settings" focused={focused} color={color} />,
         }}
       />
     </Tab.Navigator>
