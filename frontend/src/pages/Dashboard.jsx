@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { FileText, CreditCard, BookOpen, FlaskConical } from "lucide-react";
+import { FlameIcon } from "@/components/FlameIcon";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ export default function Dashboard() {
         {/* Streak */}
         <div className="rounded-2xl p-4 flex flex-col items-center gap-1"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <span style={{ fontSize: 32, lineHeight: 1 }}>🔥</span>
+          <FlameIcon active={todayDone >= dailyGoal} size={36} />
           <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
           <p className="text-xs" style={{ color: "var(--muted)" }}>Стрик</p>
         </div>

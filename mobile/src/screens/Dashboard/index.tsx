@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "@/context/ThemeContext";
 import { lsGet } from "@/utils/storage";
+import { FlameIcon } from "@/components/FlameIcon";
 import type { DashboardHomeProps } from "@/navigation/types";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -129,8 +130,8 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
         {/* Streak + today */}
         <View style={s.row2}>
           <Card style={[s.halfCard, { alignItems: "center" }]}>
-            <Text style={s.emoji}>🔥</Text>
-            <Text style={[s.bold18, { color: theme.text }]}>{streak}</Text>
+            <FlameIcon active={todayDone >= dailyGoal} size={34} />
+            <Text style={[s.bold18, { color: theme.text, marginTop: 4 }]}>{streak}</Text>
             <Text style={[s.xs, { color: theme.muted }]}>{daysWord(streak)} стрик</Text>
           </Card>
           <Card style={s.halfCard}>
@@ -209,7 +210,6 @@ const s = StyleSheet.create({
   cdDate:   { fontSize: 11, color: "#fff", opacity: 0.7, marginTop: 2 },
   row2:     { flexDirection: "row", gap: 12 },
   halfCard: { flex: 1, gap: 4 },
-  emoji:    { fontSize: 32 },
   bold18:   { fontSize: 18, fontWeight: "700" },
   sm:       { fontSize: 13 },
   xs:       { fontSize: 11 },

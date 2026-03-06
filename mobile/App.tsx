@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, ActivityIndicator, AppState } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, AppState } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -9,7 +9,6 @@ import { RootNavigator } from "@/navigation";
 import { hydrateCache, checkAndUpdateStreak, lsGet, lsSet } from "@/utils/storage";
 import { prefetchQuestions } from "@/utils/generateQuestions";
 import { refreshNotifications } from "@/utils/notifications";
-import FirstRunScreen from "@/screens/FirstRun";
 
 try {
   Notifications.setNotificationHandler({
@@ -28,9 +27,9 @@ try {
 
 function AppInner() {
   const { theme } = useTheme();
-  const [firstRun, setFirstRun] = useState(() => !lsGet("onboarding_complete", false));
+  const [noInternet, setNoInternet] = useState(false);
+  const [retrying, setRetrying] = useState(false);
 
-  // Refresh smart notifications whenever app comes to foreground
   const doNotifRefresh = useCallback(() => {
     const enabled = lsGet("notif_enabled", false) === true;
     const todayDone = Number(lsGet("today_done", 0));
@@ -38,12 +37,17 @@ function AppInner() {
     refreshNotifications(enabled, todayDone >= dailyGoal);
   }, []);
 
+  // Ensure defaults are set for first-time users (no onboarding page)
   useEffect(() => {
-    if (firstRun) return;
+    if (!lsGet("exam_date", null)) lsSet("exam_date", "2026-06-05");
+    if (!lsGet("exam_type", null)) lsSet("exam_type", "ЦТ");
+    if (!lsGet("daily_goal", null)) lsSet("daily_goal", 10);
+  }, []);
 
+  useEffect(() => {
     checkAndUpdateStreak().catch((e) => console.warn("streak:", e));
     prefetchQuestions().catch((err: Error) => {
-      console.warn("prefetchQuestions:", err.message);
+      if (err.message === "no_cache") setNoInternet(true);
     });
     doNotifRefresh();
 
@@ -51,21 +55,47 @@ function AppInner() {
       if (state === "active") doNotifRefresh();
     });
     return () => sub.remove();
-  }, [firstRun, doNotifRefresh]);
+  }, [doNotifRefresh]);
 
-  const handleFirstRunComplete = useCallback(() => {
-    lsSet("onboarding_complete", true);
-    setFirstRun(false);
+  const handleRetry = useCallback(async () => {
+    setRetrying(true);
+    try {
+      await prefetchQuestions();
+      setNoInternet(false);
+    } catch {
+      // still no internet — keep overlay visible
+    } finally {
+      setRetrying(false);
+    }
   }, []);
-
-  if (firstRun) {
-    return <FirstRunScreen onComplete={handleFirstRunComplete} />;
-  }
 
   return (
     <NavigationContainer>
       <StatusBar style={theme.dark ? "light" : "dark"} translucent={false} />
       <RootNavigator />
+
+      {/* No-internet gate — blocks UI until questions are cached */}
+      {noInternet && (
+        <View style={s.overlay}>
+          <View style={s.card}>
+            <Text style={s.title}>Необходим интернет</Text>
+            <Text style={s.body}>
+              При первом запуске нужно загрузить вопросы. Подключись к интернету и повтори попытку.
+            </Text>
+            <TouchableOpacity
+              style={s.btn}
+              onPress={handleRetry}
+              activeOpacity={0.85}
+              disabled={retrying}
+            >
+              {retrying
+                ? <ActivityIndicator color="#fff" size="small" />
+                : <Text style={s.btnText}>Повторить</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </NavigationContainer>
   );
 }
@@ -97,3 +127,48 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const s = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    zIndex: 999,
+  },
+  card: {
+    backgroundColor: "#1E293B",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    gap: 12,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#F1F5F9",
+    textAlign: "center",
+  },
+  body: {
+    fontSize: 14,
+    color: "#94A3B8",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  btn: {
+    marginTop: 4,
+    backgroundColor: "#F97316",
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    minWidth: 140,
+    alignItems: "center",
+  },
+  btnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+});

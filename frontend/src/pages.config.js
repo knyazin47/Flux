@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Cheatsheet from './pages/Cheatsheet';
@@ -61,7 +60,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Onboarding": Onboarding,
     "Dashboard": Dashboard,
     "Tasks": Tasks,
     "Cheatsheet": Cheatsheet,
@@ -74,7 +72,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Onboarding",
+    mainPage: "Dashboard",
     Pages: PAGES,
     Layout: __Layout,
 };

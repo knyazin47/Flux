@@ -36,9 +36,6 @@ export default function Layout({ children, currentPageName }) {
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
 
-  const isOnboarding = currentPageName === "Onboarding";
-  if (isOnboarding) return <>{children}</>;
-
   return (
     <>
       {noCache && (

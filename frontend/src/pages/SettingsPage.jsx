@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
   const handleReset = () => {
     localStorage.clear();
-    window.location.href = "/Onboarding";
+    window.location.href = "/Dashboard";
   };
 
   return (
