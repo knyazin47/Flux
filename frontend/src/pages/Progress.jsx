@@ -145,7 +145,7 @@ export default function Progress() {
               { icon: "📝", val: totalAnswers, label: "Ответов дано" },
               { icon: "✓", val: `${accuracy}%`, label: "Верных ответов" },
             ].map(s => (
-              <Card key={s.label} className="flex flex-col gap-1">
+              <Card key={s.label} className="flex flex-col items-center gap-1 text-center">
                 <span className="text-xl">{s.icon}</span>
                 <span className="text-2xl font-bold" style={{ color: "var(--text)" }}>{s.val}</span>
                 <span className="text-xs" style={{ color: "var(--muted)" }}>{s.label}</span>
@@ -190,7 +190,7 @@ export default function Progress() {
         <>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)" }}>
             <div className="grid grid-cols-4 px-4 py-2 text-xs font-semibold" style={{ background: "var(--border)", color: "var(--muted)" }}>
-              <span>Дата</span><span>Тип</span><span>Балл</span><span>📝</span>
+              <span>Дата</span><span>Тип</span><span>Балл</span><span>Заметки</span>
             </div>
             {rtResults.length === 0 && (
               <p className="text-sm text-center py-8" style={{ color: "var(--muted)" }}>Нет результатов</p>

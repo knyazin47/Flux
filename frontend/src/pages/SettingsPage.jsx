@@ -234,7 +234,7 @@ export default function SettingsPage() {
       <SectionHeader label="ВНЕШНИЙ ВИД" />
       <Card className="!py-0 !px-4">
         <div className="flex items-center justify-between py-3.5">
-          <span className="text-sm" style={{ color: "var(--text)" }}>🌙 Тёмная тема</span>
+          <span className="text-sm" style={{ color: "var(--text)" }}>Тёмная тема</span>
           <Switch checked={dark} onCheckedChange={setDark} />
         </div>
       </Card>
@@ -243,11 +243,11 @@ export default function SettingsPage() {
       <SectionHeader label="ЭКЗАМЕН" />
       <Card className="!py-0 !px-4">
         <div className="w-full flex items-center justify-between py-3.5 border-b" style={{ borderColor: "var(--border)" }}>
-          <span className="text-sm" style={{ color: "var(--text)" }}>📅 Дата ЦТ</span>
+          <span className="text-sm" style={{ color: "var(--text)" }}>Дата ЦТ</span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>5 июня 2026</span>
         </div>
         <div className="w-full flex items-center justify-between py-3.5">
-          <span className="text-sm" style={{ color: "var(--text)" }}>🎯 Тип экзамена</span>
+          <span className="text-sm" style={{ color: "var(--text)" }}>Тип экзамена</span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>ЦТ</span>
         </div>
       </Card>
@@ -256,7 +256,7 @@ export default function SettingsPage() {
       <SectionHeader label="ЕЖЕДНЕВНАЯ ЦЕЛЬ" />
       <Card>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Задач ежедневно</p>
+          <p className="text-sm" style={{ color: "var(--text)" }}>Задач ежедневно</p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>{dailyGoal}</p>
         </div>
         <input
@@ -271,7 +271,7 @@ export default function SettingsPage() {
       <SectionHeader label="УВЕДОМЛЕНИЯ" />
       <Card className="!py-0 !px-4">
         <div className="flex items-center justify-between py-3.5">
-          <span className="text-sm" style={{ color: "var(--text)" }}>🔔 Напоминания</span>
+          <span className="text-sm" style={{ color: "var(--text)" }}>Напоминания</span>
           <Switch checked={notif} onCheckedChange={v => { setNotif(v); save("notif_enabled", v); }} />
         </div>
       </Card>
@@ -295,7 +295,7 @@ export default function SettingsPage() {
       {/* Данные */}
       <SectionHeader label="ДАННЫЕ" />
       <Card className="!py-0 !px-4">
-        <SettingRow left="🗑️ Сбросить весь прогресс" right={null} onClick={() => setModal("reset")} red />
+        <SettingRow left="Сбросить весь прогресс" right={null} onClick={() => setModal("reset")} red />
       </Card>
 
       <p className="text-xs text-center mt-4 pb-4" style={{ color: "var(--muted)" }}>Flux • v{APP_VERSION}</p>

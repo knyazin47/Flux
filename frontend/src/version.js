@@ -10,4 +10,6 @@
 //   1.5.2  Fix CI: git pull--rebase before push; log claude stderr; switch --print to -p
 //   1.6.0  FlameIcon SVG (active/gray), remove Onboarding, MSK streak, "Серия",
 //          Tasks uses daily_goal, settings slider, copy toast, exam date 2026-06-05
-export const APP_VERSION = "1.6.0";
+//   1.6.1  Settings cleanup (no emojis, no time picker, slider style), Tasks/Theory
+//          dropdown+mode selector, Progress stat cards centered, RT table "Заметки"
+export const APP_VERSION = "1.6.1";
