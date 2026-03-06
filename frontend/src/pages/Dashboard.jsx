@@ -50,7 +50,7 @@ function ls(key, fallback) {
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const examDate  = ls("exam_date", "2026-06-12");
+  const examDate  = ls("exam_date", "2026-06-05");
   const examType  = ls("exam_type", "ЦТ");
   const dailyGoal = parseInt(ls("daily_goal", "10"));
   const todayDone = parseInt(ls("today_done", "0"));
@@ -92,7 +92,7 @@ export default function Dashboard() {
         {/* Streak */}
         <div className="rounded-2xl p-4 flex flex-col items-center gap-1"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <FlameIcon active={todayDone >= dailyGoal} size={36} />
+          <FlameIcon active={todayDone >= 1} size={36} />
           <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
           <p className="text-xs" style={{ color: "var(--muted)" }}>Стрик</p>
         </div>

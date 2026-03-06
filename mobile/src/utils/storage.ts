@@ -93,12 +93,13 @@ export async function hydrateCache(): Promise<void> {
 
 // ── Date helpers ───────────────────────────────────────────────────────────
 
+// MSK = UTC+3. Add 3 h so day boundary matches 00:00 Moscow time.
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date(Date.now() + 3 * 3600_000).toISOString().slice(0, 10);
 }
 
 function yesterdayStr(): string {
-  const d = new Date();
+  const d = new Date(Date.now() + 3 * 3600_000);
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 }

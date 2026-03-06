@@ -74,6 +74,9 @@ export default function Layout({ children, currentPageName }) {
         }
         body { background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
         .border, .border-b, .border-t, .border-l, .border-r { border-color: var(--border); }
+        input[type="range"] { accent-color: #F97316; height: 6px; cursor: pointer; }
+        input[type="range"]::-webkit-slider-thumb { background: #F97316; border: none; width: 20px; height: 20px; border-radius: 50%; -webkit-appearance: none; cursor: pointer; box-shadow: 0 1px 4px rgba(249,115,22,0.4); }
+        input[type="range"]::-moz-range-thumb { background: #F97316; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-shadow: 0 1px 4px rgba(249,115,22,0.4); }
       `}</style>
 
       <div className="min-h-screen flex flex-col items-center" style={{ background: "var(--bg)" }}>

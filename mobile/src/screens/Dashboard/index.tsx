@@ -75,7 +75,7 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
     Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }).start();
   }, [fadeAnim]));
 
-  const examDate  = String(lsGet("exam_date",  "2026-06-12") ?? "2026-06-12");
+  const examDate  = String(lsGet("exam_date",  "2026-06-05") ?? "2026-06-05");
   const examType  = String(lsGet("exam_type",  "ЦТ") ?? "ЦТ");
   const dailyGoal = Number(lsGet("daily_goal", 10));
   const todayDone = Number(lsGet("today_done", 0));
@@ -130,7 +130,7 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
         {/* Streak + today */}
         <View style={s.row2}>
           <Card style={[s.halfCard, { alignItems: "center" }]}>
-            <FlameIcon active={todayDone >= dailyGoal} size={34} />
+            <FlameIcon active={todayDone >= 1} size={34} />
             <Text style={[s.bold18, { color: theme.text, marginTop: 4 }]}>{streak}</Text>
             <Text style={[s.xs, { color: theme.muted }]}>{daysWord(streak)} стрик</Text>
           </Card>

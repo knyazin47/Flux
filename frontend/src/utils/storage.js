@@ -19,12 +19,13 @@ export function lsSet(key, value) {
 
 // ── Date helpers ──────────────────────────────────────────────────────────
 
+// MSK = UTC+3. Add 3 h so day boundary matches 00:00 Moscow time.
 function todayStr() {
-  return new Date().toISOString().slice(0, 10); // "2026-03-04"
+  return new Date(Date.now() + 3 * 3600_000).toISOString().slice(0, 10);
 }
 
 function yesterdayStr() {
-  const d = new Date();
+  const d = new Date(Date.now() + 3 * 3600_000);
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 }
