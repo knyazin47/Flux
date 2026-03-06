@@ -34,6 +34,9 @@ jobs:
           printf '%s' "$CLAUDE_CREDENTIALS_JSON" > ~/.claude/.credentials.json
           chmod 600 ~/.claude/.credentials.json
 
+      - name: Verify Claude auth
+        run: claude --version
+
       - name: Generate questions
         run: node scripts/generate-daily.js
 
@@ -43,4 +46,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add frontend/public/daily-questions.json
           git diff --staged --quiet || git commit -m "chore: update daily questions [skip ci]"
+          git pull --rebase origin main
           git push

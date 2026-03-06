@@ -7,4 +7,5 @@
 //   1.4.0  Rebranding to Flux, icon set, manifest fix
 //   1.5.0  SettingsPage updates, cache metadata requirement, GitHub link
 //   1.5.1  Fix AI language bug (Belarusian→Russian), README branding corrections
-export const APP_VERSION = "1.5.1";
+//   1.5.2  Fix CI: git pull--rebase before push; log claude stderr; switch --print to -p
+export const APP_VERSION = "1.5.2";

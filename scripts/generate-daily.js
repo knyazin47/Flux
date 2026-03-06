@@ -45,11 +45,19 @@ function sleep(ms) {
 function generateBatch(topic, difficulty) {
   const prompt = buildPrompt(topic, COUNT_PER_BATCH, difficulty);
 
-  const raw = execFileSync("claude", ["--print", prompt, "--output-format", "text"], {
-    encoding: "utf-8",
-    maxBuffer: 10 * 1024 * 1024,
-    timeout: 300_000, // 5 минут на запрос
-  });
+  let raw;
+  try {
+    raw = execFileSync("claude", ["-p", prompt, "--output-format", "text"], {
+      encoding: "utf-8",
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 300_000, // 5 минут на запрос
+    });
+  } catch (err) {
+    // Log the actual stderr/stdout so CI shows the real error, not just the command string
+    if (err.stderr) console.error("  [stderr]", err.stderr.trim());
+    if (err.stdout) console.error("  [stdout]", err.stdout.trim());
+    throw err;
+  }
 
   // Убираем возможные markdown-блоки ```json ... ```
   const cleaned = raw.replace(/^```(?:json)?\s*/m, "").replace(/\s*```$/m, "").trim();
