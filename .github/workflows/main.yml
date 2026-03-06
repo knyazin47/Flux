@@ -2,12 +2,22 @@ name: Generate Daily Questions
 
 on:
   schedule:
-    - cron: '43 2 * * *'   # 06:00 UTC = 09:00 Minsk
-  workflow_dispatch:       # allow manual run
+    - cron: '43 2 * * *'   # 06:00 UTC = 09:00 Minsk (UTC+3)
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+# Prevent parallel runs — only one generation at a time
+concurrency:
+  group: daily-questions
+  cancel-in-progress: false
+
+# Least-privilege token: only write to repository contents
+permissions:
+  contents: write
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout

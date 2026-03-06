@@ -2,10 +2,10 @@
 
 ## Getting Started
 
-1. Fork the repository and create your branch from `master`
+1. Fork the repository and create your branch from `main`
 2. Follow the [Development Guide](DEVELOPMENT.md) to set up your local environment
 3. Make your changes, then run `npm run lint:fix` and `npm run typecheck`
-4. Open a pull request against `master`
+4. Open a pull request against `main`
 
 ---
 
@@ -22,60 +22,53 @@
 
 ## Commit Messages
 
-Use the conventional commits format:
+Every commit must start with the current version number (see [Versioning](DEVELOPMENT.md#versioning)):
 
 ```
-type(scope): short description
-
-Optional longer body.
+v1.2.3: short description of the change
 ```
 
-Types: `feat`, `fix`, `refactor`, `docs`, `style`, `chore`
+For CI/tooling commits where a version bump is not applicable, prefix with the type:
 
-Examples:
 ```
-feat(tasks): add resume modal for in-progress sessions
-fix(progress): read correct localStorage keys for XP and streak
-docs: add architecture overview to docs/
+chore: update daily questions [skip ci]
+docs: fix typo in CONTRIBUTING.md
 ```
 
 ---
 
 ## Pull Request Guidelines
 
-- Keep PRs focused — one feature or fix per PR
+- One feature or fix per PR — keep scope focused
 - Describe what changed and why in the PR description
-- Ensure `npm run lint` passes with no errors
-- Test on mobile viewport (max-width 390px) if changing UI
-
----
-
-## What to Work On
-
-See [PLAN.md](../PLAN.md) for the phased roadmap. Open issues are the best place to pick up work.
-
-Current priorities:
-1. Connect real question data to Tasks, Theory, and MockExam pages
-2. Wire up all localStorage writes (XP, topic stats, achievements) on session completion
-3. PWA manifest + service worker
-4. Push notifications
+- `npm run lint` must pass with no errors (web and/or mobile)
+- Test on mobile viewport (390 px) if changing web UI; test on a real device if changing mobile
 
 ---
 
 ## Code Conventions
 
-- **No backend** — all state is `localStorage` only
+- **No backend** — all state is `localStorage` / `AsyncStorage` only
 - **Russian UI** — all user-facing strings are in Russian
-- **Mobile-first** — design for 390px max-width, test on real devices if possible
-- **CSS variables for colors** — use `style={{ color: "var(--text)" }}`, not Tailwind color classes
-- **Minimal abstractions** — don't generalize prematurely; three similar lines of code is better than a premature helper
+- **Mobile-first** — design for 390 px max-width on web; test on real Android for mobile
+- **CSS variables for web colors** — use `style={{ color: "var(--text)" }}`, not Tailwind color classes
+- **`theme` object for mobile colors** — use `useTheme()`, never hardcode colors except `#F97316` (accent)
+- **Minimal abstractions** — three similar lines of code is better than a premature helper
+
+---
+
+## What to Work On
+
+Open GitHub issues are the best place to pick up work. Check the `bug` and `enhancement` labels.
 
 ---
 
 ## Reporting Bugs
 
-Open a GitHub issue with:
+Use the [bug report issue template](.github/ISSUE_TEMPLATE/bug_report.md). Include:
 - Steps to reproduce
-- Expected vs actual behavior
-- Device / browser / OS
-- Screenshots if relevant (especially for layout bugs)
+- Expected vs actual behaviour
+- Platform (Web PWA / Android APK), device, OS, app version
+- Screenshots if relevant
+
+For **security vulnerabilities**, see [SECURITY.md](../SECURITY.md) — do not open a public issue.

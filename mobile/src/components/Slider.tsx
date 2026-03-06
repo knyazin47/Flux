@@ -2,7 +2,7 @@
 // Works without @react-native-community/slider or reanimated.
 // Uses PanResponder + ref-based width measurement.
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { View, Text, PanResponder, StyleSheet } from "react-native";
 
 const THUMB = 24;
@@ -44,6 +44,9 @@ export function Slider({
   valueRef.current = value;
 
   const trackRef = useRef<View>(null);
+  // containerWidth in state so that onLayout triggers a re-render,
+  // making fillWidth and thumbLeft correct immediately after mount.
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const calcValue = (pageX: number): number => {
     const { width, pageX: ox } = info.current;
@@ -71,12 +74,10 @@ export function Slider({
     })
   ).current;
 
-  // Pixel positions derived from current container width
-  const pct = info.current.width > 0
-    ? Math.max(0, Math.min(1, (value - min) / (max - min)))
-    : Math.max(0, Math.min(1, (value - min) / (max - min)));
-  const fillWidth = info.current.width * pct;
-  const thumbLeft = info.current.width * pct - THUMB / 2;
+  // Pixel positions — derived from containerWidth state (triggers re-render after layout)
+  const pct = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const fillWidth = containerWidth * pct;
+  const thumbLeft = containerWidth * pct - THUMB / 2;
 
   return (
     <View style={ss.wrapper} {...panResponder.panHandlers}>
@@ -85,7 +86,7 @@ export function Slider({
         onLayout={(e) => {
           const w = e.nativeEvent.layout.width;
           info.current.width = w;
-          // trigger re-render so fill/thumb positions update after layout
+          setContainerWidth(w); // triggers re-render so fill/thumb appear correctly
           trackRef.current?.measure((_x, _y, _w, _h, px) => {
             info.current.pageX = px;
           });
