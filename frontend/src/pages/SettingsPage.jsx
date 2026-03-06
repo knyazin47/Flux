@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 import { APP_VERSION } from "@/version";
 import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
 
