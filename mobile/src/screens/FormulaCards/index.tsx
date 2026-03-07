@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
 import { lsGet, lsSet } from "@/utils/storage";
 import formulasData from "@/data/formulas.json";
-import type { FormulasHomeProps } from "@/navigation/types";
+import type { FormulaCardsProps } from "@/navigation/types";
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -178,7 +178,7 @@ function SummaryScreen({ ratings, total, onRestart }: { ratings: RatingId[]; tot
 
 // ── main screen ───────────────────────────────────────────────────────────────
 
-export default function FormulaCardsScreen(_props: FormulasHomeProps) {
+export default function FormulaCardsScreen(_props: FormulaCardsProps) {
   const { theme } = useTheme();
   const [tab, setTab]               = useState<"topics" | "review" | "hard">("topics");
   const [activeTopic, setActiveTopic] = useState<string | null>(null);

@@ -99,10 +99,10 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
   }
 
   const quickItems = [
-    { label: "Задания",   sub: `${todayDone}/${dailyGoal} выполнено`, tab: "Tasks",    iconBg: "#EFF6FF", icon: "📝" },
-    { label: "Формулы",   sub: "Карточки",                             tab: "Formulas", iconBg: "#FFF7ED", icon: "∑"  },
-    { label: "Прогресс",  sub: "Статистика",                           tab: "Progress", iconBg: "#F0FDF4", icon: "📊" },
-    { label: "Настройки", sub: "Параметры",                            tab: "Settings", iconBg: "#FDF4FF", icon: "⚙"  },
+    { label: "Задания",  sub: `${todayDone}/${dailyGoal} выполнено`, action: () => navTo("Tasks"),                          iconBg: "#EFF6FF", icon: "📝" },
+    { label: "Формулы",  sub: "Карточки",                             action: () => navigation.navigate("FormulaCards"),    iconBg: "#FFF7ED", icon: "∑"  },
+    { label: "Теория",   sub: "MCQ по теории",                        action: () => navTo("Theory"),                        iconBg: "#F0FDF4", icon: "📖" },
+    { label: "Экзамен",  sub: "Пробный тест",                         action: () => navigation.navigate("MockExam"),        iconBg: "#FDF4FF", icon: "🎯" },
   ];
 
   function scoreStyle(n: number) {
@@ -153,10 +153,10 @@ export default function DashboardScreen({ navigation }: DashboardHomeProps) {
 
         {/* Quick access */}
         <View style={s.row2}>
-          {quickItems.map(({ label, sub, tab, iconBg, icon }) => (
-            <TouchableOpacity key={tab} activeOpacity={0.85}
+          {quickItems.map(({ label, sub, action, iconBg, icon }) => (
+            <TouchableOpacity key={label} activeOpacity={0.85}
               style={[s.quickCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-              onPress={() => navTo(tab)}>
+              onPress={action}>
               <View style={[s.iconBox, { backgroundColor: iconBg }]}>
                 <Text style={{ fontSize: 18 }}>{icon}</Text>
               </View>
