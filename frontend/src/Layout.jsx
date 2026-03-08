@@ -86,7 +86,7 @@ export default function Layout({ children, currentPageName }) {
             }}
           >
             <a
-              href="https://github.com/knyazin47"
+              href="https://github.com/knyazin47/Flux"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors"

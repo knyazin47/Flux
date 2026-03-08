@@ -46,7 +46,7 @@ node scripts/generate-daily.js
 
 ### Versioning Protocol (SemVer)
 **Web:** Maintain the version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION` export) — they must always match.
-**Mobile:** Version is tracked independently in `mobile/package.json` only.
+**Mobile:** Mobile app has been removed; web is the only target.
 - **Patch (0.0.x):** Bug fixes, style tweaks, minor text edits.
 - **Minor (0.x.0):** New features, logic changes, new content modules.
 - **Major (x.0.0):** Breaking changes, rebranding, or complete architecture overhauls.
@@ -82,12 +82,11 @@ flux/
 
 The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6 with `src/pages.config.js`. Auth is a no-op stub (`src/lib/AuthContext.jsx`) — the app is fully local with no backend.
 
-**Routing:** `src/pages.config.js` registers all pages and the shared `Layout`. Routes are `/{PageName}` based on the key in the `PAGES` object. `createPageUrl(name)` in `src/utils/index.ts` generates these URLs. The file header claims auto-generation but it is manually maintained. The Onboarding page bypasses the Layout (no nav).
+**Routing:** `src/pages.config.js` registers all pages and the shared `Layout`. Routes are `/{PageName}` based on the key in the `PAGES` object. `createPageUrl(name)` in `src/utils/index.ts` generates these URLs. The file header claims auto-generation but it is **manually maintained**. Landing page is `Dashboard`.
 
 **Layout (`src/Layout.jsx`):** Sticky header (56px) + fixed bottom nav (64px) + scrollable `<main>`. Manages dark/light theme via CSS variables on `:root`/`.dark` and `localStorage("theme")`. Shows a "resume session" Play button in the header when `tasks_session` or `theory_session` exist in localStorage.
 
-**Pages (10 total):**
-- `Onboarding` - exam date, daily goal, push permission setup
+**Pages (9 registered):**
 - `Dashboard` - countdown, streak, XP, daily progress
 - `Tasks` - daily question session (5-choice MCQ, timer, explanations)
 - `Theory` - topic-based MCQ (theory difficulty)
@@ -97,6 +96,8 @@ The app is a **mobile-first PWA** (max-width 390px). Routing uses React Router 6
 - `Progress` - stats, topic heatmap, RT/DRT tracker, achievements
 - `SettingsPage` - theme, exam date, notifications, reset
 - `ActiveSessions` - view and resume in-progress sessions
+
+Note: `Onboarding.jsx` exists in `src/pages/` but is not registered in `pages.config.js` and is unreachable via the router.
 
 **State management:** All state is in `localStorage` only (no backend, no accounts). The utility layer is in `src/utils/storage.js`:
 - `lsGet(key, fallback)` / `lsSet(key, value)` - safe localStorage wrappers

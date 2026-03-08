@@ -13,4 +13,6 @@
 //   1.6.1  Settings cleanup (no emojis, no time picker, slider style), Tasks/Theory
 //          dropdown+mode selector, Progress stat cards centered, RT table "Заметки"
 //   1.6.2  Fix streak: increment only when flame lit (≥1 task done), not on app open
-export const APP_VERSION = "1.6.2";
+//   2.0.0  Public release: remove mobile app, clean dead deps, streak rework (MSK/day-1),
+//          refresh button with spin animation, slider thumb fix, GitHub link
+export const APP_VERSION = "2.0.0";
