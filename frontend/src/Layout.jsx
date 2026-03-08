@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPageUrl } from "@/utils";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, FileText, BarChart2, Settings, Moon, Sun, GraduationCap, ClipboardList, Github } from "lucide-react";
 import { checkAndUpdateStreak } from "@/utils/storage";
 import { prefetchQuestions } from "@/utils/generateQuestions";
@@ -15,23 +15,133 @@ const navItems = [
   { label: "Ещё", icon: Settings, page: "SettingsPage" },
 ];
 
+const NAV_PAGES = navItems.map((n) => n.page);
+
+// ── Notification scheduling ───────────────────────────────────────────────
+function sendNotifSchedule() {
+  if (!("serviceWorker" in navigator)) return;
+  const enabled = localStorage.getItem("notif_enabled") === "true";
+  const time = localStorage.getItem("notif_time") || "18:00";
+  navigator.serviceWorker.ready
+    .then((reg) => reg.active?.postMessage({ type: "SCHEDULE_NOTIF", enabled, time }))
+    .catch(() => {});
+}
+
 export default function Layout({ children, currentPageName }) {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [activeCount, setActiveCount] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const mainRef = useRef(null);
+  const swipe = useRef({ startX: 0, startY: 0, isHoriz: null, dx: 0 });
 
+  // ── Init ────────────────────────────────────────────────────────────────
   useEffect(() => {
     checkAndUpdateStreak();
     prefetchQuestions().catch(() => {});
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then(() => sendNotifSchedule())
+        .catch(() => {});
+    }
   }, []);
 
   useEffect(() => {
-    setActiveCount(SESSION_KEYS.filter(k => !!localStorage.getItem(k)).length);
+    setActiveCount(SESSION_KEYS.filter((k) => !!localStorage.getItem(k)).length);
   }, [currentPageName]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
+
+  // ── Swipe navigation ────────────────────────────────────────────────────
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const sw = swipe.current;
+
+    const onTouchStart = (e) => {
+      sw.startX = e.touches[0].clientX;
+      sw.startY = e.touches[0].clientY;
+      sw.isHoriz = null;
+      sw.dx = 0;
+      el.style.transition = "";
+    };
+
+    const onTouchMove = (e) => {
+      const dx = e.touches[0].clientX - sw.startX;
+      const dy = e.touches[0].clientY - sw.startY;
+
+      if (sw.isHoriz === null) {
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+          sw.isHoriz = Math.abs(dx) > Math.abs(dy);
+        }
+      }
+
+      if (!sw.isHoriz) return;
+
+      const idx = NAV_PAGES.indexOf(currentPageName);
+      if (idx === -1) return; // not a swipeable page
+
+      const canGoNext = idx < NAV_PAGES.length - 1;
+      const canGoPrev = idx > 0;
+
+      if ((dx < 0 && !canGoNext) || (dx > 0 && !canGoPrev)) {
+        // rubber-band at edge
+        e.preventDefault();
+        el.style.transform = `translateX(${dx * 0.08}px)`;
+        return;
+      }
+
+      e.preventDefault();
+      sw.dx = dx;
+      el.style.transform = `translateX(${dx * 0.45}px)`;
+    };
+
+    const onTouchEnd = () => {
+      if (!sw.isHoriz) return;
+
+      const idx = NAV_PAGES.indexOf(currentPageName);
+
+      // Always reset transform
+      el.style.transition = "transform 0.22s ease-out";
+      el.style.transform = "translateX(0)";
+      setTimeout(() => {
+        el.style.transition = "";
+        el.style.transform = "";
+      }, 220);
+
+      if (idx === -1) return;
+
+      const THRESHOLD = 65;
+      if (sw.dx < -THRESHOLD && idx < NAV_PAGES.length - 1) {
+        navigate(createPageUrl(NAV_PAGES[idx + 1]), { state: { slideFrom: "right" } });
+      } else if (sw.dx > THRESHOLD && idx > 0) {
+        navigate(createPageUrl(NAV_PAGES[idx - 1]), { state: { slideFrom: "left" } });
+      }
+
+      sw.dx = 0;
+      sw.isHoriz = null;
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [currentPageName, navigate]);
+
+  // ── Page dots (only for nav pages) ──────────────────────────────────────
+  const navIdx = NAV_PAGES.indexOf(currentPageName);
+  const slideFrom = location.state?.slideFrom;
 
   return (
     <>
@@ -69,6 +179,15 @@ export default function Layout({ children, currentPageName }) {
         .dark input[type="range"].slider-muted::-moz-range-thumb { background: #64748B; }
         [role="switch"][data-state="unchecked"] { background-color: var(--border) !important; }
         [role="switch"][data-state="checked"] { background-color: #F97316 !important; }
+
+        @keyframes slideInFromRight {
+          from { transform: translateX(100%); }
+          to   { transform: translateX(0); }
+        }
+        @keyframes slideInFromLeft {
+          from { transform: translateX(-100%); }
+          to   { transform: translateX(0); }
+        }
       `}</style>
 
       <div className="min-h-screen flex flex-col items-center" style={{ background: "var(--bg)" }}>
@@ -130,34 +249,62 @@ export default function Layout({ children, currentPageName }) {
           </header>
 
           {/* PAGE CONTENT */}
-          <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-            {children}
+          <main ref={mainRef} className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
+            <div
+              key={location.pathname}
+              style={{
+                animation: slideFrom === "right"
+                  ? "slideInFromRight 0.25s ease-out"
+                  : slideFrom === "left"
+                  ? "slideInFromLeft 0.25s ease-out"
+                  : undefined,
+              }}
+            >
+              {children}
+            </div>
           </main>
 
           {/* BOTTOM NAV */}
           <nav
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-30 flex items-center justify-around"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-30 flex flex-col"
             style={{
-              height: 64,
               background: "var(--card)",
               borderTop: "1px solid var(--border)",
               paddingBottom: "env(safe-area-inset-bottom)",
             }}
           >
-            {navItems.map(({ label, icon: Icon, page }) => {
-              const active = currentPageName === page;
-              return (
-                <Link
-                  key={page}
-                  to={createPageUrl(page)}
-                  className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-colors"
-                  style={{ color: active ? "#F97316" : "var(--muted)" }}
-                >
-                  <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </Link>
-              );
-            })}
+            {/* Page position dots */}
+            {navIdx !== -1 && (
+              <div className="flex justify-center gap-1.5 pt-2 pb-0.5">
+                {NAV_PAGES.map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-full transition-all duration-200"
+                    style={{
+                      width: i === navIdx ? 16 : 5,
+                      height: 5,
+                      background: i === navIdx ? "#F97316" : "var(--border)",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="flex items-center justify-around" style={{ height: navIdx !== -1 ? 52 : 64 }}>
+              {navItems.map(({ label, icon: Icon, page }) => {
+                const active = currentPageName === page;
+                return (
+                  <Link
+                    key={page}
+                    to={createPageUrl(page)}
+                    className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-colors"
+                    style={{ color: active ? "#F97316" : "var(--muted)" }}
+                  >
+                    <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+                    <span className="text-[10px] font-medium">{label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
         </div>
       </div>

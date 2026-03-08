@@ -53,6 +53,7 @@ export default function SettingsPage() {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [dailyGoal, setDailyGoal] = useState(localStorage.getItem("daily_goal") || "10");
   const [notif, setNotif] = useState(localStorage.getItem("notif_enabled") === "true");
+  const [notifTime, setNotifTime] = useState(localStorage.getItem("notif_time") || "18:00");
   const [modal, setModal] = useState(null); // reset | sync-save | sync-load
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncCode, setSyncCode] = useState("");
@@ -162,6 +163,30 @@ export default function SettingsPage() {
   }, [dark]);
 
   const save = (key, val) => localStorage.setItem(key, val);
+
+  const scheduleNotif = (enabled, time) => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.ready
+      .then((reg) => reg.active?.postMessage({ type: "SCHEDULE_NOTIF", enabled, time }))
+      .catch(() => {});
+  };
+
+  const handleNotifToggle = async (v) => {
+    if (v && Notification.permission === "default") {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") return;
+    }
+    if (v && Notification.permission !== "granted") return;
+    setNotif(v);
+    save("notif_enabled", v);
+    scheduleNotif(v, notifTime);
+  };
+
+  const handleNotifTime = (t) => {
+    setNotifTime(t);
+    save("notif_time", t);
+    if (notif) scheduleNotif(true, t);
+  };
 
   const handleReset = () => {
     localStorage.clear();
@@ -289,10 +314,22 @@ export default function SettingsPage() {
       {/* Уведомления */}
       <SectionHeader label="УВЕДОМЛЕНИЯ" />
       <Card className="!py-0 !px-4">
-        <div className="flex items-center justify-between py-3.5">
+        <div className="flex items-center justify-between py-3.5" style={{ borderBottom: notif ? "1px solid var(--border)" : "none" }}>
           <span className="text-sm" style={{ color: "var(--text)" }}>Напоминания</span>
-          <Switch checked={notif} onCheckedChange={v => { setNotif(v); save("notif_enabled", v); }} />
+          <Switch checked={notif} onCheckedChange={handleNotifToggle} />
         </div>
+        {notif && (
+          <div className="flex items-center justify-between py-3.5">
+            <span className="text-sm" style={{ color: "var(--text)" }}>Время напоминания</span>
+            <input
+              type="time"
+              value={notifTime}
+              onChange={e => handleNotifTime(e.target.value)}
+              className="text-sm font-semibold rounded-lg px-2 py-1 outline-none"
+              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
+            />
+          </div>
+        )}
       </Card>
 
       {/* Синхронизация */}
