@@ -13,7 +13,10 @@
 - **Daily practice** — MCQ question bank generated fresh every day by Claude AI
 - **Formula cards** — SM-2 spaced-repetition flashcards for all 9 physics topics
 - **Mock exams** — full (30 q / 90 min) or mini (10 q / 30 min) simulations
-- **Progress tracking** — XP, streaks, topic heatmap, RT/DRT history, achievements
+- **Progress tracking** — XP, streaks, 30-day activity chart, topic heatmap, RT/DRT history
+- **Achievements** — 9 unlockable achievements with real tracking and progress indicators
+- **Swipe navigation** — horizontal swipe between main pages, like a native mobile app
+- **Push notifications** — daily reminders via Service Worker at a configurable time
 - **Offline-first** — all data stored locally; no accounts, no backend
 - **Dark/light theme**, session auto-save and resume
 
@@ -26,6 +29,7 @@ flux/
   frontend/          # React PWA (Vite + Tailwind + shadcn/ui)
   api/
     generate.js      # Vercel serverless — POST /api/generate (on-demand questions)
+    sync.js          # Vercel serverless — sync code save/load
   data/
     formulas.json    # Master formula database (LaTeX + metadata, 9 topics)
   scripts/
@@ -88,6 +92,7 @@ Requires the `claude` CLI authenticated via `claude auth login`. See [docs/DEVEL
 | Styling | Tailwind CSS + shadcn/ui |
 | Navigation | React Router 6 |
 | Storage | `localStorage` |
+| Notifications | Service Worker |
 | CI | GitHub Actions + Claude CLI |
 | Hosting | Vercel |
 
@@ -103,6 +108,8 @@ Requires the `claude` CLI authenticated via `claude auth login`. See [docs/DEVEL
 | 7-day streak | +150 |
 
 Levels: **Физик** (0) → **Механик** (200) → **Учёный** (500) → **Академик** (1000) → **Эпштейн** (2000)
+
+Achievements: Старт · Неостановимый · Сотня · Все темы · Неделя · Скоростной · Отличник · Чемпион · Физик
 
 ---
 

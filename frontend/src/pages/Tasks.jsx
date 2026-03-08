@@ -6,7 +6,7 @@ import { X, Check, Star, ChevronDown } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { generateQuestions } from "@/utils/generateQuestions";
-import { lsGet, incrementTodayDone, addXP, updateTopicStats, checkAchievements, unlockAchievement } from "@/utils/storage";
+import { lsGet, incrementTodayDone, addXP, updateTopicStats, checkAchievements, unlockAchievement, recordDailyActivity } from "@/utils/storage";
 
 function TeX({ formula }) {
   const html = katex.renderToString(formula, { throwOnError: false, displayMode: true });
@@ -187,6 +187,7 @@ export default function Tasks() {
         Object.entries(byTopic).forEach(([topic, { correct, total }]) => updateTopicStats(topic, correct, total));
         if (correctCount >= 10) unlockAchievement("speed_10");
         if (correctCount === sessionQuestions.length && sessionQuestions.length > 0) unlockAchievement("perfect");
+        recordDailyActivity(sessionQuestions.length);
         checkAchievements();
         setAnswers(newAnswers);
         setView("results");

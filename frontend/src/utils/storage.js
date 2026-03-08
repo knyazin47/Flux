@@ -129,6 +129,19 @@ export function addRtResult({ date, type, score, note = "" }) {
   lsSet("rt_results", results);
 }
 
+// ── Activity history ──────────────────────────────────────────────────────
+// Хранится как объект { "YYYY-MM-DD": count } (MSK-дата).
+// Вызывается при завершении сессии Tasks, Theory, MockExam.
+
+export function recordDailyActivity(count = 1) {
+  if (!count || count <= 0) return;
+  const today = todayStr();
+  const history = lsGet("activity_history", {});
+  const obj = typeof history === "object" && !Array.isArray(history) ? history : {};
+  obj[today] = (obj[today] || 0) + count;
+  lsSet("activity_history", obj);
+}
+
 // ── Достижения ────────────────────────────────────────────────────────────
 
 function getTotalAnswers() {

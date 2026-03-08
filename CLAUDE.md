@@ -108,16 +108,19 @@ Note: `Onboarding.jsx` exists in `src/pages/` but is not registered in `pages.co
 
 **Key localStorage keys:**
 - `theme` - "dark" | "light"
-- `streak_days`, `streak_last_date` - streak tracking
+- `streak_days`, `streak_last_date`, `streak_active_date` - streak tracking
+- `days_used_total` - total unique calendar days the app was opened
 - `xp_total`, `today_xp`, `today_done` - XP and daily progress
 - `daily_goal` - number of daily questions target
 - `topic_stats` - `{ [topic]: { correct, total } }`
 - `achievements` - `[{ id, unlockedAt }]`
+- `activity_history` - `{ "YYYY-MM-DD": count }` (MSK dates, questions answered per day)
 - `rt_results` - RT/DRT exam history
 - `exam_date` - ISO date string, default `"2026-06-05"`
 - `exam_type` - `"ЦТ"` | `"ЦЭ"`
-- `tasks_session`, `theory_session` - in-progress session state (for resume)
-- `daily_questions_data`, `daily_questions_date` - cached daily questions
+- `notif_enabled`, `notif_time` - push notification settings
+- `tasks_session`, `theory_session`, `exam_session` - in-progress session state (for resume)
+- `daily_questions_data`, `daily_questions_date`, `daily_questions_generated_at` - cached daily questions
 
 **Daily questions:** Fetched from `/daily-questions.json` (served as static asset), cached in localStorage per day. Structure: `{ date, generated_at, questions: { [topic]: { 1: [...], 2: [...] } } }` where keys 1/2 are difficulty levels. Cache is invalidated if `generated_at` metadata is missing. The fetch/cache logic lives in `src/utils/generateQuestions.js`; `prefetchQuestions()` is called once on Layout mount.
 
@@ -136,6 +139,11 @@ Tailwind is used for layout/spacing; component colors use `style={{ color: "var(
 ```
 XP rewards: correct answer +10, daily goal +50, mock exam +100, streak 7 days +150
 Levels: Физик(0) → Механик(200) → Учёный(500) → Академик(1000) → Эпштейн(2000)
-Achievements: first_task, streak_7, answers_100, all_topics, perfect
+Achievements (9): first_task, streak_7, answers_100, all_topics, week_days,
+                  speed_10, perfect, champion, formula_topic
 ```
+
+**Swipe navigation:** Layout.jsx captures touch events on `<main>` and applies `transform` to an inner `contentRef` div (not `<main>` itself — that would break `position: fixed` on the nav). Swipe is active only on the 5 bottom-nav pages. Incoming pages animate via CSS keyframes (`slideInFromRight` / `slideInFromLeft`) keyed on `location.state.slideFrom`.
+
+**Push notifications:** `public/sw.js` is a Service Worker that receives `{ type: "SCHEDULE_NOTIF", enabled, time }` messages and uses `setTimeout` to fire `showNotification()` at the configured time daily. Registered in Layout.jsx on mount. Settings UI lives in SettingsPage — requests `Notification.requestPermission()` synchronously in a user-gesture handler (not async/await).
 

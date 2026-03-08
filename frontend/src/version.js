@@ -18,4 +18,5 @@
 //   2.1.0  Achievements: 9 tracked, real unlock logic, progress bars, lucide icons
 //   2.2.0  Swipe navigation between main pages, push notifications via Service Worker
 //   2.2.1  Fix swipe breaking fixed nav (transform on contentRef, not main), fix notif toggle
-export const APP_VERSION = "2.2.1";
+//   2.3.0  Activity history chart (30-day, date-keyed), project cleanup for public release
+export const APP_VERSION = "2.3.0";

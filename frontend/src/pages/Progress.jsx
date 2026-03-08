@@ -47,9 +47,15 @@ const barColor = (pct) => pct >= 70 ? "#22C55E" : pct >= 50 ? "#EAB308" : pct >=
 
 function loadWeekData() {
   try {
-    const raw = JSON.parse(localStorage.getItem("activity_history") || "[]");
-    const arr = Array.isArray(raw) ? raw : [];
-    return Array.from({ length: 30 }, (_, i) => arr[i] ?? 0);
+    const raw = lsGet("activity_history", {});
+    const obj = typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+    const now = new Date(Date.now() + 3 * 3600_000); // MSK
+    return Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (29 - i));
+      const key = d.toISOString().slice(0, 10);
+      return obj[key] || 0;
+    });
   } catch {
     return Array(30).fill(0);
   }
