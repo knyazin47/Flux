@@ -33,6 +33,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
   const mainRef = useRef(null);
+  const contentRef = useRef(null); // transform target — NOT the scroll container
   const swipe = useRef({ startX: 0, startY: 0, isHoriz: null, dx: 0 });
 
   // ── Init ────────────────────────────────────────────────────────────────
@@ -64,12 +65,14 @@ export default function Layout({ children, currentPageName }) {
     if (!el) return;
     const sw = swipe.current;
 
+    const content = () => contentRef.current;
+
     const onTouchStart = (e) => {
       sw.startX = e.touches[0].clientX;
       sw.startY = e.touches[0].clientY;
       sw.isHoriz = null;
       sw.dx = 0;
-      el.style.transition = "";
+      if (content()) content().style.transition = "";
     };
 
     const onTouchMove = (e) => {
@@ -85,21 +88,20 @@ export default function Layout({ children, currentPageName }) {
       if (!sw.isHoriz) return;
 
       const idx = NAV_PAGES.indexOf(currentPageName);
-      if (idx === -1) return; // not a swipeable page
+      if (idx === -1) return;
 
       const canGoNext = idx < NAV_PAGES.length - 1;
       const canGoPrev = idx > 0;
 
+      e.preventDefault();
+
       if ((dx < 0 && !canGoNext) || (dx > 0 && !canGoPrev)) {
-        // rubber-band at edge
-        e.preventDefault();
-        el.style.transform = `translateX(${dx * 0.08}px)`;
+        if (content()) content().style.transform = `translateX(${dx * 0.08}px)`;
         return;
       }
 
-      e.preventDefault();
       sw.dx = dx;
-      el.style.transform = `translateX(${dx * 0.45}px)`;
+      if (content()) content().style.transform = `translateX(${dx * 0.45}px)`;
     };
 
     const onTouchEnd = () => {
@@ -107,21 +109,22 @@ export default function Layout({ children, currentPageName }) {
 
       const idx = NAV_PAGES.indexOf(currentPageName);
 
-      // Always reset transform
-      el.style.transition = "transform 0.22s ease-out";
-      el.style.transform = "translateX(0)";
-      setTimeout(() => {
-        el.style.transition = "";
-        el.style.transform = "";
-      }, 220);
+      // Snap content back (nav is never touched)
+      if (content()) {
+        content().style.transition = "transform 0.22s ease-out";
+        content().style.transform = "translateX(0)";
+        setTimeout(() => {
+          if (content()) { content().style.transition = ""; content().style.transform = ""; }
+        }, 220);
+      }
 
-      if (idx === -1) return;
-
-      const THRESHOLD = 65;
-      if (sw.dx < -THRESHOLD && idx < NAV_PAGES.length - 1) {
-        navigate(createPageUrl(NAV_PAGES[idx + 1]), { state: { slideFrom: "right" } });
-      } else if (sw.dx > THRESHOLD && idx > 0) {
-        navigate(createPageUrl(NAV_PAGES[idx - 1]), { state: { slideFrom: "left" } });
+      if (idx !== -1) {
+        const THRESHOLD = 65;
+        if (sw.dx < -THRESHOLD && idx < NAV_PAGES.length - 1) {
+          navigate(createPageUrl(NAV_PAGES[idx + 1]), { state: { slideFrom: "right" } });
+        } else if (sw.dx > THRESHOLD && idx > 0) {
+          navigate(createPageUrl(NAV_PAGES[idx - 1]), { state: { slideFrom: "left" } });
+        }
       }
 
       sw.dx = 0;
@@ -250,17 +253,20 @@ export default function Layout({ children, currentPageName }) {
 
           {/* PAGE CONTENT */}
           <main ref={mainRef} className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-            <div
-              key={location.pathname}
-              style={{
-                animation: slideFrom === "right"
-                  ? "slideInFromRight 0.25s ease-out"
-                  : slideFrom === "left"
-                  ? "slideInFromLeft 0.25s ease-out"
-                  : undefined,
-              }}
-            >
-              {children}
+            {/* contentRef: persistent transform target — keeps nav fixed unaffected */}
+            <div ref={contentRef}>
+              <div
+                key={location.pathname}
+                style={{
+                  animation: slideFrom === "right"
+                    ? "slideInFromRight 0.25s ease-out"
+                    : slideFrom === "left"
+                    ? "slideInFromLeft 0.25s ease-out"
+                    : undefined,
+                }}
+              >
+                {children}
+              </div>
             </div>
           </main>
 

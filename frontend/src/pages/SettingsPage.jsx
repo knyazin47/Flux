@@ -171,15 +171,32 @@ export default function SettingsPage() {
       .catch(() => {});
   };
 
-  const handleNotifToggle = async (v) => {
-    if (v && Notification.permission === "default") {
-      const perm = await Notification.requestPermission();
-      if (perm !== "granted") return;
+  const handleNotifToggle = (v) => {
+    if (!v) {
+      setNotif(false);
+      save("notif_enabled", false);
+      scheduleNotif(false, notifTime);
+      return;
     }
-    if (v && Notification.permission !== "granted") return;
-    setNotif(v);
-    save("notif_enabled", v);
-    scheduleNotif(v, notifTime);
+
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+      setNotif(true);
+      save("notif_enabled", true);
+      scheduleNotif(true, notifTime);
+    } else if (Notification.permission === "denied") {
+      alert("Уведомления заблокированы в настройках браузера. Разрешите их вручную и попробуйте снова.");
+    } else {
+      // "default" — must call inside sync user-gesture handler, use .then()
+      Notification.requestPermission().then((perm) => {
+        if (perm === "granted") {
+          setNotif(true);
+          save("notif_enabled", true);
+          scheduleNotif(true, notifTime);
+        }
+      });
+    }
   };
 
   const handleNotifTime = (t) => {
