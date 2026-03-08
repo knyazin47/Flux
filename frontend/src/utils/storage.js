@@ -32,14 +32,18 @@ function yesterdayStr() {
 
 // ── Streak ────────────────────────────────────────────────────────────────
 // Вызывается один раз при каждом открытии приложения (из Layout).
-// Правила:
-//   lastDate == today        → ничего не делаем (уже обновлено сегодня)
-//   activeDate == вчера      → огонёк был зажжён вчера → стрик +1
-//   activeDate < вчера       → вчера заданий не было → стрик сброшен в 0
-//   lastDate === null        → первый запуск, стрик = 0
 //
-// streak_active_date — дата, когда пользователь выполнил хотя бы 1 задание.
-// Выставляется в incrementTodayDone при первом задании дня.
+// streak_active_date — дата последнего дня, когда выполнено ≥1 задание.
+//                      Выставляется в incrementTodayDone при первом задании дня.
+// streak_days        — счётчик серии. Инкрементируется там же.
+//
+// Состояния иконки огня:
+//   streak_days = 0                          → серая, без числа   (нет серии)
+//   streak_days > 0, active_date ≠ today     → серая, число видно (ожидание)
+//   streak_days > 0, active_date = today     → оранжевая, число   (активна)
+//
+// Сброс: если lastDate установлен, но вчера заданий не было (active_date < вчера),
+// серия считается сломанной и обнуляется при следующем открытии приложения.
 
 export function checkAndUpdateStreak() {
   const today = todayStr();
@@ -51,13 +55,14 @@ export function checkAndUpdateStreak() {
   lsSet("today_done", 0);
   lsSet("today_xp", 0);
 
-  // Стрик продолжается только если вчера был зажжён огонёк (сделано ≥1 задание)
+  // Если вчера не было ни одного задания — серия сломана (без возможности восстановления)
   const activeDate = lsGet("streak_active_date", null);
-  if (activeDate === yesterdayStr()) {
-    lsSet("streak_days", Number(lsGet("streak_days", 0)) + 1);
-  } else if (lastDate !== null) {
-    lsSet("streak_days", 0); // вчера заданий не было — сброс
+  if (lastDate !== null && activeDate !== yesterdayStr()) {
+    lsSet("streak_days", 0);
+    lsSet("streak_active_date", null);
   }
+  // Если activeDate === вчера: серия жива, streak_days сохраняется.
+  // Инкремент произойдёт в incrementTodayDone при первом задании нового дня.
 
   lsSet("streak_last_date", today);
 }
@@ -76,22 +81,21 @@ export function addXP(amount) {
   const todayXP = Number(lsGet("today_xp",  0)) + amount;
   lsSet("xp_total",  total);
   lsSet("today_xp",  todayXP);
-
-  // Проверяем достижение стрика 7 дней
-  checkStreakAchievement();
-
   return total;
 }
 
 // ── Дневной прогресс ──────────────────────────────────────────────────────
 
 export function incrementTodayDone(count = 1) {
-  const done = Number(lsGet("today_done", 0)) + count;
+  const prev = Number(lsGet("today_done", 0));
+  const done = prev + count;
   lsSet("today_done", done);
 
-  // Первое задание дня — зажигаем огонёк (фиксируем активный день для стрика)
-  if (done >= 1) {
+  // Первое задание дня: зажигаем огонёк и инкрементируем серию
+  if (prev === 0 && done >= 1) {
     lsSet("streak_active_date", todayStr());
+    lsSet("streak_days", Number(lsGet("streak_days", 0)) + 1);
+    checkStreakAchievement();
   }
 
   // Если выполнена дневная цель — бонус XP (один раз в день)

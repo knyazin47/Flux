@@ -93,7 +93,11 @@ export default function Dashboard() {
         <div className="rounded-2xl p-4 flex flex-col items-center gap-1"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <FlameIcon active={todayDone >= 1} size={36} />
-          <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
+          {streak > 0 ? (
+            <p className="text-lg font-bold mt-1" style={{ color: "var(--text)" }}>{streak} {daysWord(streak)}</p>
+          ) : (
+            <p className="text-lg font-bold mt-1" style={{ color: "var(--muted)" }}>—</p>
+          )}
           <p className="text-xs" style={{ color: "var(--muted)" }}>Серия</p>
         </div>
 
