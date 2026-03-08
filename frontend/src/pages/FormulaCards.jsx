@@ -4,7 +4,7 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 import OrangeButton from "@/components/ui/OrangeButton";
 import formulasData from "../../../data/formulas.json";
-import { lsGet, lsSet } from "@/utils/storage";
+import { lsGet, lsSet, unlockAchievement } from "@/utils/storage";
 
 // ── Построить карту тема → формулы из formulas.json ───────────────────────
 const FORMULAS_BY_TOPIC = {};
@@ -223,6 +223,11 @@ export default function FormulaCards() {
     const newRatings = [...ratings, rating];
     setRatings(newRatings);
     if (cardIndex + 1 >= cards.length) {
+      // Check if any topic is fully mastered
+      const tp = getTopicProgress();
+      if (tp.some(t => t.total > 0 && t.done === t.total)) {
+        unlockAchievement("formula_topic");
+      }
       setFinished(true);
     } else {
       setCardIndex((i) => i + 1);

@@ -36,6 +36,7 @@ function yesterdayStr() {
 // streak_active_date — дата последнего дня, когда выполнено ≥1 задание.
 //                      Выставляется в incrementTodayDone при первом задании дня.
 // streak_days        — счётчик серии. Инкрементируется там же.
+// days_used_total    — сколько уникальных дней пользователь открывал приложение.
 //
 // Состояния иконки огня:
 //   streak_days = 0                          → серая, без числа   (нет серии)
@@ -50,6 +51,9 @@ export function checkAndUpdateStreak() {
   const lastDate = lsGet("streak_last_date", null);
 
   if (lastDate === today) return; // уже обновлено сегодня
+
+  // Новый день — считаем посещение
+  lsSet("days_used_total", Number(lsGet("days_used_total", 0)) + 1);
 
   // День сменился — обнуляем дневные счётчики
   lsSet("today_done", 0);
@@ -127,18 +131,85 @@ export function addRtResult({ date, type, score, note = "" }) {
 
 // ── Достижения ────────────────────────────────────────────────────────────
 
-const ACHIEVEMENTS_DEF = [
-  { id: "first_task",  check: () => Number(lsGet("today_done", 0)) >= 1 },
-  { id: "streak_7",    check: () => Number(lsGet("streak_days",  0)) >= 7 },
-  { id: "answers_100", check: () => getTotalAnswers() >= 100 },
-  { id: "all_topics",  check: () => Object.keys(lsGet("topic_stats", {})).length >= 9 },
-  { id: "perfect",     check: () => false }, // выставляется вручную из MockExam
-];
-
 function getTotalAnswers() {
   const stats = lsGet("topic_stats", {});
   return Object.values(stats).reduce((s, t) => s + (t.total || 0), 0);
 }
+
+function getTotalCorrect() {
+  const stats = lsGet("topic_stats", {});
+  return Object.values(stats).reduce((s, t) => s + (t.correct || 0), 0);
+}
+
+// Метаданные достижений для UI. getProgress возвращает { value, max } или null.
+export const ACHIEVEMENTS_META = [
+  {
+    id: "first_task",
+    name: "Старт",
+    desc: "Первое задание выполнено",
+    getProgress: () => ({ value: Math.min(getTotalAnswers(), 1), max: 1 }),
+  },
+  {
+    id: "streak_7",
+    name: "Неостановимый",
+    desc: "Серия 7 дней подряд",
+    getProgress: () => ({ value: Math.min(Number(lsGet("streak_days", 0)), 7), max: 7 }),
+  },
+  {
+    id: "answers_100",
+    name: "Сотня",
+    desc: "100 верных ответов",
+    getProgress: () => ({ value: Math.min(getTotalCorrect(), 100), max: 100 }),
+  },
+  {
+    id: "all_topics",
+    name: "Все темы",
+    desc: "Все 9 тем изучены",
+    getProgress: () => ({ value: Math.min(Object.keys(lsGet("topic_stats", {})).length, 9), max: 9 }),
+  },
+  {
+    id: "week_days",
+    name: "Неделя",
+    desc: "7 дней в приложении",
+    getProgress: () => ({ value: Math.min(Number(lsGet("days_used_total", 0)), 7), max: 7 }),
+  },
+  {
+    id: "speed_10",
+    name: "Скоростной",
+    desc: "10 верных в одной сессии",
+    getProgress: null,
+  },
+  {
+    id: "perfect",
+    name: "Отличник",
+    desc: "100% в тесте",
+    getProgress: null,
+  },
+  {
+    id: "champion",
+    name: "Чемпион",
+    desc: "90%+ в полном тесте",
+    getProgress: null,
+  },
+  {
+    id: "formula_topic",
+    name: "Физик",
+    desc: "Все формулы одной темы",
+    getProgress: null,
+  },
+];
+
+const ACHIEVEMENTS_DEF = [
+  { id: "first_task",    check: () => getTotalAnswers() >= 1 },
+  { id: "streak_7",      check: () => Number(lsGet("streak_days", 0)) >= 7 },
+  { id: "answers_100",   check: () => getTotalCorrect() >= 100 },
+  { id: "all_topics",    check: () => Object.keys(lsGet("topic_stats", {})).length >= 9 },
+  { id: "week_days",     check: () => Number(lsGet("days_used_total", 0)) >= 7 },
+  { id: "speed_10",      check: () => false }, // выставляется из Tasks
+  { id: "perfect",       check: () => false }, // выставляется из Tasks/MockExam
+  { id: "champion",      check: () => false }, // выставляется из MockExam
+  { id: "formula_topic", check: () => false }, // выставляется из FormulaCards
+];
 
 export function checkAchievements() {
   const unlocked = lsGet("achievements", []);

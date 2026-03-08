@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Card from "@/components/ui/Card";
-import ProgressBar from "@/components/ui/ProgressBar";
 import OrangeButton from "@/components/ui/OrangeButton";
-import { X } from "lucide-react";
+import { X, Rocket, Flame, Star, BookOpen, Calendar, Zap, Target, Award, Sigma, Lock, Check } from "lucide-react";
+import { lsGet, ACHIEVEMENTS_META } from "@/utils/storage";
 
 const TOPICS = [
   "Механика", "Молекулярная физика", "Термодинамика",
@@ -23,17 +23,25 @@ function loadTopicStats() {
   }
 }
 
-const ACHIEVEMENTS = [
-  { emoji: "🔥", name: "Неостановимый", desc: "Серия 7 дней", unlocked: false },
-  { emoji: "⚡", name: "Скоростной", desc: "10 верных за 5 мин", unlocked: false },
-  { emoji: "📚", name: "Все темы", desc: "Все 9 тем", unlocked: false },
-  { emoji: "🎯", name: "Отличник", desc: "100% в тесте", unlocked: false },
-  { emoji: "🧲", name: "Физик", desc: "Все формулы темы", unlocked: false },
-  { emoji: "📅", name: "Неделя", desc: "7 дней в приложении", unlocked: false },
-  { emoji: "🚀", name: "Старт", desc: "Первое задание", unlocked: true },
-  { emoji: "💯", name: "Сотня", desc: "100 верных ответов", unlocked: false },
-  { emoji: "🏆", name: "Чемпион", desc: "90%+ в полном тесте", unlocked: false },
-];
+const ACHIEVEMENT_ICONS = {
+  first_task:    Rocket,
+  streak_7:      Flame,
+  answers_100:   Star,
+  all_topics:    BookOpen,
+  week_days:     Calendar,
+  speed_10:      Zap,
+  perfect:       Target,
+  champion:      Award,
+  formula_topic: Sigma,
+};
+
+function formatUnlockDate(isoStr) {
+  try {
+    return new Date(isoStr).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+  } catch {
+    return "";
+  }
+}
 
 const barColor = (pct) => pct >= 70 ? "#22C55E" : pct >= 50 ? "#EAB308" : pct >= 30 ? "#F97316" : "#EF4444";
 
@@ -92,6 +100,69 @@ function AddResultModal({ onClose, onSave }) {
   );
 }
 
+function AchievementCard({ meta, unlockedAt }) {
+  const unlocked = !!unlockedAt;
+  const Icon = ACHIEVEMENT_ICONS[meta.id] ?? Star;
+  const progress = meta.getProgress ? meta.getProgress() : null;
+  const progressPct = progress ? Math.round((progress.value / progress.max) * 100) : 0;
+
+  return (
+    <div
+      className="flex flex-col gap-2 p-4 rounded-2xl relative"
+      style={{
+        background: "var(--card)",
+        border: `1px solid ${unlocked ? "#F97316" : "var(--border)"}`,
+        opacity: unlocked ? 1 : 0.75,
+      }}
+    >
+      {/* Icon + status badge */}
+      <div className="flex items-start justify-between">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: unlocked ? "rgba(249,115,22,0.12)" : "var(--bg)" }}
+        >
+          <Icon size={20} style={{ color: unlocked ? "#F97316" : "var(--muted)" }} />
+        </div>
+        {unlocked ? (
+          <div className="w-5 h-5 rounded-full flex items-center justify-center"
+            style={{ background: "#22C55E" }}>
+            <Check size={11} color="#fff" strokeWidth={3} />
+          </div>
+        ) : (
+          <Lock size={14} style={{ color: "var(--muted)" }} />
+        )}
+      </div>
+
+      {/* Text */}
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-bold leading-tight" style={{ color: unlocked ? "var(--text)" : "var(--muted)" }}>
+          {meta.name}
+        </p>
+        <p className="text-xs leading-snug" style={{ color: "var(--muted)" }}>
+          {meta.desc}
+        </p>
+      </div>
+
+      {/* Progress bar (only when locked and has progress) */}
+      {!unlocked && progress !== null && (
+        <div className="flex flex-col gap-1">
+          <div className="w-full rounded-full h-1.5" style={{ background: "var(--border)" }}>
+            <div className="h-1.5 rounded-full transition-all" style={{ width: `${progressPct}%`, background: "#F97316" }} />
+          </div>
+          <p className="text-[10px]" style={{ color: "var(--muted)" }}>{progress.value} / {progress.max}</p>
+        </div>
+      )}
+
+      {/* Unlock date */}
+      {unlocked && unlockedAt && (
+        <p className="text-[10px] font-medium" style={{ color: "#22C55E" }}>
+          {formatUnlockDate(unlockedAt)}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Progress() {
   const [tab, setTab] = useState("Статистика");
   const [showModal, setShowModal] = useState(false);
@@ -110,6 +181,11 @@ export default function Progress() {
   const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
 
   const maxBar = Math.max(...weekData, 1);
+
+  // Achievements: read unlocked map from localStorage
+  const unlockedList = lsGet("achievements", []);
+  const unlockedMap = Object.fromEntries(unlockedList.map(a => [a.id, a.unlockedAt]));
+  const unlockedCount = ACHIEVEMENTS_META.filter(a => unlockedMap[a.id]).length;
 
   const saveResult = (r) => {
     const next = [r, ...rtResults];
@@ -226,22 +302,21 @@ export default function Progress() {
         </>
       )}
 
-      {/* TAB 4 */}
+      {/* TAB 4 — Достижения */}
       {tab === "Достижения" && (
         <>
-          <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Достижения</p>
-          <div className="grid grid-cols-3 gap-3">
-            {ACHIEVEMENTS.map(a => (
-              <div key={a.name} className="flex flex-col items-center gap-1 p-3 rounded-2xl relative"
-                style={{ background: "var(--card)", border: `1px solid ${a.unlocked ? "#F97316" : "var(--border)"}`, opacity: a.unlocked ? 1 : 0.6 }}>
-                <span className="text-2xl">{a.unlocked ? a.emoji : "🔒"}</span>
-                <span className="text-[10px] font-semibold text-center" style={{ color: a.unlocked ? "var(--text)" : "var(--muted)" }}>{a.name}</span>
-                <span className="text-[9px] text-center" style={{ color: "var(--muted)" }}>{a.desc}</span>
-                {a.unlocked && (
-                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px]"
-                    style={{ background: "#22C55E", color: "#fff" }}>✓</div>
-                )}
-              </div>
+          {/* Counter */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Достижения</p>
+            <p className="text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: "var(--bg)", color: unlockedCount > 0 ? "#F97316" : "var(--muted)", border: "1px solid var(--border)" }}>
+              {unlockedCount} / {ACHIEVEMENTS_META.length}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {ACHIEVEMENTS_META.map(meta => (
+              <AchievementCard key={meta.id} meta={meta} unlockedAt={unlockedMap[meta.id]} />
             ))}
           </div>
         </>

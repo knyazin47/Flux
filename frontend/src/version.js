@@ -15,4 +15,5 @@
 //   1.6.2  Fix streak: increment only when flame lit (≥1 task done), not on app open
 //   2.0.0  Public release: remove mobile app, clean dead deps, streak rework (MSK/day-1),
 //          refresh button with spin animation, slider thumb fix, GitHub link
-export const APP_VERSION = "2.0.0";
+//   2.1.0  Achievements: 9 tracked, real unlock logic, progress bars, lucide icons
+export const APP_VERSION = "2.1.0";

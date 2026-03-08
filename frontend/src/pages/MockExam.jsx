@@ -4,7 +4,7 @@ import OrangeButton from "@/components/ui/OrangeButton";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { X, Flag } from "lucide-react";
 import { generateQuestions } from "@/utils/generateQuestions";
-import { addXP, addRtResult } from "@/utils/storage";
+import { addXP, addRtResult, unlockAchievement, checkAchievements } from "@/utils/storage";
 
 const TOPICS = [
   "Механика", "Молекулярная физика", "Термодинамика",
@@ -142,6 +142,10 @@ export default function MockExam() {
       localStorage.setItem("topic_stats", JSON.stringify(stats));
       const correct = questions.filter((q, i) => userAnswers[i] === q.correct).length;
       addXP(correct * (format === "full" ? 5 : 10));
+      const examPct = Math.round((correct / questions.length) * 100);
+      if (examPct === 100) unlockAchievement("perfect");
+      if (format === "full" && examPct >= 90) unlockAchievement("champion");
+      checkAchievements();
     } catch {}
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
