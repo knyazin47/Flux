@@ -69,10 +69,13 @@ export default function SettingsPage() {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const { generated_at } = await forceRefetchQuestions();
+      const [{ generated_at }] = await Promise.all([
+        forceRefetchQuestions(),
+        new Promise((r) => setTimeout(r, 1400)), // минимум один полный цикл анимации
+      ]);
       setQuestionsUpdatedAt(formatGeneratedAt(generated_at));
     } catch {
-      // сеть недоступна — оставляем старую дату
+      await new Promise((r) => setTimeout(r, 1400));
     } finally {
       setRefreshing(false);
     }
