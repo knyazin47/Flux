@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { X, ChevronRight } from "lucide-react";
+import { X, ChevronRight, RefreshCw } from "lucide-react";
 import { APP_VERSION } from "@/version";
-import { CACHE_GENERATED_AT_KEY } from "@/utils/generateQuestions";
+import { CACHE_GENERATED_AT_KEY, forceRefetchQuestions } from "@/utils/generateQuestions";
 
 const SYNC_KEYS = [
   "streak_days", "streak_last_date",
@@ -60,7 +60,23 @@ export default function SettingsPage() {
   const [syncError, setSyncError] = useState("");
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
-  const questionsUpdatedAt = formatGeneratedAt(localStorage.getItem(CACHE_GENERATED_AT_KEY));
+  const [questionsUpdatedAt, setQuestionsUpdatedAt] = useState(
+    () => formatGeneratedAt(localStorage.getItem(CACHE_GENERATED_AT_KEY))
+  );
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshQuestions = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const { generated_at } = await forceRefetchQuestions();
+      setQuestionsUpdatedAt(formatGeneratedAt(generated_at));
+    } catch {
+      // сеть недоступна — оставляем старую дату
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleCopyCode = () => {
     navigator.clipboard?.writeText(syncCode);
@@ -286,9 +302,29 @@ export default function SettingsPage() {
       {/* Вопросы */}
       <SectionHeader label="ВОПРОСЫ" />
       <Card className="!py-0 !px-4">
-        <div className="flex flex-col gap-0.5 py-3.5">
-          <span className="text-sm" style={{ color: "var(--text)" }}>Последнее обновление</span>
-          <span className="text-xs" style={{ color: "var(--muted)" }}>{questionsUpdatedAt}</span>
+        <style>{`
+          @keyframes spin-cycle {
+            0%   { transform: rotate(0deg); }
+            40%  { transform: rotate(360deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+        <div className="flex items-center justify-between py-3.5">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm" style={{ color: "var(--text)" }}>Последнее обновление</span>
+            <span className="text-xs" style={{ color: "var(--muted)" }}>{questionsUpdatedAt}</span>
+          </div>
+          <button
+            onClick={handleRefreshQuestions}
+            disabled={refreshing}
+            className="w-8 h-8 flex items-center justify-center rounded-lg"
+            style={{ color: refreshing ? "#F97316" : "var(--muted)", background: "var(--bg)" }}
+          >
+            <RefreshCw
+              size={16}
+              style={refreshing ? { animation: "spin-cycle 1.4s cubic-bezier(0.4,0,0.6,1) infinite" } : {}}
+            />
+          </button>
         </div>
       </Card>
 

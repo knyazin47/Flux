@@ -98,3 +98,14 @@ export function clearQuestionsCache() {
   localStorage.removeItem(CACHE_KEY);
   localStorage.removeItem(CACHE_DATE_KEY);
 }
+
+/**
+ * Принудительно перезагрузить вопросы с сервера, игнорируя кэш.
+ * Возвращает объект { generated_at } с новой меткой времени.
+ */
+export async function forceRefetchQuestions() {
+  clearQuestionsCache();
+  const data = await fetchDailyQuestions();
+  writeCache(data);
+  return { generated_at: data.generated_at || data.date || "" };
+}
