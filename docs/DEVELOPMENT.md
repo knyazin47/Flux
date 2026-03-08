@@ -5,7 +5,6 @@
 - **Node.js** 18+ ([nodejs.org](https://nodejs.org))
 - **npm** 9+
 - **Claude CLI** (for daily question generation only) — `npm install -g @anthropic-ai/claude-code`, then `claude auth login`
-- **Android Studio** + JDK 17 (for local mobile builds without EAS)
 
 ---
 
@@ -37,47 +36,6 @@ npm run dev
 
 ---
 
-## Mobile App
-
-```bash
-cd flux/mobile
-npm install
-npm start          # Expo dev server (Metro bundler) — scan QR with Expo Go
-```
-
-### Commands (run from `mobile/`)
-
-| Command | Description |
-|---|---|
-| `npm start` | Expo dev server |
-| `npm run android` | Build + run on connected Android device/emulator |
-| `npm run ios` | Build + run on iOS simulator |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript type check |
-
-### Build APK via EAS (cloud)
-
-```bash
-# Requires eas-cli and an Expo account
-eas build --platform android --profile preview
-```
-
-Produces a sideloadable `.apk` (no Google Play required).
-
-### Build APK locally (no EAS queue)
-
-```bash
-npx expo prebuild --platform android   # generate android/ native project
-cd android
-gradlew.bat assembleDebug              # Windows
-# ./gradlew assembleDebug             # macOS / Linux
-# APK → android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Requires Android SDK (`ANDROID_HOME` in PATH) and JDK 17.
-
----
-
 ## Daily Question Generation
 
 `scripts/generate-daily.js` calls the Claude CLI to produce a fresh question set and writes it to `frontend/public/daily-questions.json`.
@@ -101,7 +59,7 @@ The workflow uses OAuth secrets stored in GitHub — no API key is in the reposi
 
 ## Versioning
 
-Both web and mobile follow [SemVer](https://semver.org).
+Follows [SemVer](https://semver.org).
 
 | Bump | When |
 |---|---|
@@ -109,9 +67,7 @@ Both web and mobile follow [SemVer](https://semver.org).
 | Minor `0.x.0` | New features, logic changes, new content |
 | Major `x.0.0` | Breaking changes, rebranding, architecture overhaul |
 
-**Web:** bump version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION`). They must always match.
-
-**Mobile:** bump version in `mobile/package.json` only (tracked independently from web).
+Bump version in **both** `frontend/package.json` and `frontend/src/version.js` (`APP_VERSION`). They must always match.
 
 Every commit must start with the version tag: `v1.2.3: description`.
 
@@ -130,7 +86,7 @@ Every commit must start with the version tag: `v1.2.3: description`.
 
 ---
 
-## Design System (Web)
+## Design System
 
 CSS variables are defined in `Layout.jsx`. Always use them for colors:
 
@@ -148,31 +104,14 @@ Tailwind is for spacing, layout, and sizing only.
 
 ---
 
-## Design System (Mobile)
-
-Use the `theme` object from `useTheme()` — it mirrors the web CSS variable names:
-
-```tsx
-const { theme } = useTheme();
-<View style={{ backgroundColor: theme.card, borderColor: theme.border }}>
-  <Text style={{ color: theme.text }}>...</Text>
-</View>
-```
-
-Accent orange is always `"#F97316"` (hardcoded — same in both themes).
-
----
-
 ## Storage Conventions
 
-- **Web:** use `lsGet` / `lsSet` from `src/utils/storage.js` — never access `localStorage` directly
-- **Mobile:** use `lsGet` / `lsSet` from `src/utils/storage.ts` — call `hydrateCache()` at startup before any `lsGet`
-- Session keys (`tasks_session`, `theory_session`, `exam_session`) should include a `savedAt` timestamp
+Use `lsGet` / `lsSet` from `src/utils/storage.js` — never access `localStorage` directly. Session keys (`tasks_session`, `theory_session`, `exam_session`) should include a `savedAt` timestamp.
 
 ---
 
 ## Code Style
 
-- ESLint configured in both `frontend/` and `mobile/` — run `npm run lint:fix` before committing
+- ESLint configured in `frontend/` — run `npm run lint:fix` before committing
 - No test suite is configured
 - All user-facing strings are in Russian

@@ -41,18 +41,17 @@ docs: fix typo in CONTRIBUTING.md
 
 - One feature or fix per PR — keep scope focused
 - Describe what changed and why in the PR description
-- `npm run lint` must pass with no errors (web and/or mobile)
-- Test on mobile viewport (390 px) if changing web UI; test on a real device if changing mobile
+- `npm run lint` must pass with no errors
+- Test on mobile viewport (390 px) if changing web UI
 
 ---
 
 ## Code Conventions
 
-- **No backend** — all state is `localStorage` / `AsyncStorage` only
+- **No backend** — all state is `localStorage` only
 - **Russian UI** — all user-facing strings are in Russian
-- **Mobile-first** — design for 390 px max-width on web; test on real Android for mobile
-- **CSS variables for web colors** — use `style={{ color: "var(--text)" }}`, not Tailwind color classes
-- **`theme` object for mobile colors** — use `useTheme()`, never hardcode colors except `#F97316` (accent)
+- **Mobile-first** — design for 390 px max-width
+- **CSS variables for colors** — use `style={{ color: "var(--text)" }}`, not Tailwind color classes
 - **Minimal abstractions** — three similar lines of code is better than a premature helper
 
 ---
@@ -68,7 +67,7 @@ Open GitHub issues are the best place to pick up work. Check the `bug` and `enha
 Use the [bug report issue template](.github/ISSUE_TEMPLATE/bug_report.md). Include:
 - Steps to reproduce
 - Expected vs actual behaviour
-- Platform (Web PWA / Android APK), device, OS, app version
+- Device, OS, browser, app version
 - Screenshots if relevant
 
 For **security vulnerabilities**, see [SECURITY.md](../SECURITY.md) — do not open a public issue.

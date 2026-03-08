@@ -1,9 +1,8 @@
 # Flux
 
-> Physics exam preparation for the Belarusian ЦТ/ЦЭ 2026 — mobile-first PWA and native Android app.
+> Physics exam preparation for the Belarusian ЦТ/ЦЭ 2026 — mobile-first PWA.
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
-![Expo](https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -17,7 +16,6 @@
 - **Progress tracking** — XP, streaks, topic heatmap, RT/DRT history, achievements
 - **Offline-first** — all data stored locally; no accounts, no backend
 - **Dark/light theme**, session auto-save and resume
-- **Native Android app** — built with Expo, works on devices without Google Play Services
 
 ---
 
@@ -26,7 +24,6 @@
 ```
 flux/
   frontend/          # React PWA (Vite + Tailwind + shadcn/ui)
-  mobile/            # Expo React Native app (Android + iOS)
   api/
     generate.js      # Vercel serverless — POST /api/generate (on-demand questions)
   data/
@@ -40,9 +37,7 @@ flux/
 
 ---
 
-## Web PWA
-
-### Quick start
+## Quick start
 
 ```bash
 git clone https://github.com/knyazin47/flux.git
@@ -53,7 +48,7 @@ npm run dev
 # → http://localhost:5173
 ```
 
-### Commands
+## Commands
 
 | Command | Description |
 |---|---|
@@ -70,43 +65,9 @@ Deployed on Vercel. `vercel.json` configures the build and SPA rewrite rule.
 
 ---
 
-## Android App
-
-Built with Expo SDK 55. Works on devices without Google Play Services (no Firebase/FCM).
-
-### Quick start
-
-```bash
-cd flux/mobile
-npm install
-npm start          # Expo dev server (Metro bundler)
-```
-
-### Build APK (sideload)
-
-```bash
-# Requires eas-cli + Expo account
-eas build --platform android --profile preview
-```
-
-The `preview` profile in `mobile/eas.json` produces a sideloadable `.apk`.
-
-### Local debug build (no EAS queue)
-
-```bash
-npx expo prebuild --platform android
-cd android
-gradlew.bat assembleDebug
-# APK → android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Requires Android SDK + JDK 17.
-
----
-
 ## Daily Question Generation
 
-A GitHub Action runs daily at **09:00 Minsk time** (UTC+3) and commits a fresh `frontend/public/daily-questions.json`. The mobile app fetches the same file from the Vercel deployment.
+A GitHub Action runs daily at **09:00 Minsk time** (UTC+3) and commits a fresh `frontend/public/daily-questions.json`.
 
 Run locally:
 
@@ -120,16 +81,15 @@ Requires the `claude` CLI authenticated via `claude auth login`. See [docs/DEVEL
 
 ## Tech Stack
 
-| | Web | Mobile |
-|---|---|---|
-| Framework | React 18 + Vite 6 | Expo SDK 55 + React Native 0.83 |
-| Language | JavaScript + TypeScript | TypeScript |
-| Styling | Tailwind CSS + shadcn/ui | React Native StyleSheet |
-| Navigation | React Router 6 | React Navigation 7 |
-| Storage | `localStorage` | AsyncStorage |
-| Notifications | — | expo-notifications (local only) |
-| CI | GitHub Actions + Claude CLI | EAS Build |
-| Hosting | Vercel | Sideload APK |
+| | |
+|---|---|
+| Framework | React 18 + Vite 6 |
+| Language | JavaScript + TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Navigation | React Router 6 |
+| Storage | `localStorage` |
+| CI | GitHub Actions + Claude CLI |
+| Hosting | Vercel |
 
 ---
 

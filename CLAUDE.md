@@ -21,33 +21,6 @@ npm run preview    # preview production build locally
 
 No test suite is configured.
 
-### Mobile (run from `mobile/`)
-
-```bash
-cd mobile
-npm install          # install dependencies
-npm start            # start Expo dev server (Metro bundler)
-npm run android      # run on Android device/emulator (expo run:android)
-npm run ios          # run on iOS simulator (expo run:ios)
-npm run lint         # ESLint
-npm run typecheck    # TypeScript type-check (no emit)
-```
-
-**Building APK (no GMS/Google Play):**
-```bash
-# EAS Build — requires eas-cli and Expo account
-eas build --platform android --profile preview
-```
-The `preview` profile in `mobile/eas.json` produces an `.apk` (not `.aab`) suitable for sideloading on devices without Google Play Services (e.g. Huawei).
-
-### Environment setup
-
-Create `frontend/.env.local` (see `frontend/.env.example` for all variables):
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
-```
-
 ### Vercel serverless (api/generate.js)
 
 `POST /api/generate` generates questions on-demand via Claude Haiku. Requires `ANTHROPIC_API_KEY` set in the Vercel project environment (not in `.env.local`). Accepts `{ topic, count, difficulty, formulaContext }` in the request body.
@@ -93,7 +66,6 @@ node scripts/generate-daily.js
 ```
 flux/
   frontend/          # React PWA (Vite)
-  mobile/            # Expo React Native app (iOS + Android)
   api/
     generate.js      # Vercel Serverless Function — POST /api/generate (on-demand questions via Claude)
   data/
@@ -166,35 +138,3 @@ Levels: Физик(0) → Механик(200) → Учёный(500) → Акад
 Achievements: first_task, streak_7, answers_100, all_topics, perfect
 ```
 
-### Mobile architecture (Expo SDK 55)
-
-Stack: Expo SDK 55, React Native 0.83.2, React 19.2.0, TypeScript, React Navigation 7.
-
-**Entry & startup (`mobile/App.tsx`):** Shows a loading spinner while `hydrateCache()` completes, then mounts `SafeAreaProvider > ThemeProvider > NavigationContainer > RootNavigator`. Inside the inner component, `checkAndUpdateStreak()`, `prefetchQuestions()`, and `refreshNotifications()` run on mount; `refreshNotifications()` is also called whenever the app returns to foreground (`AppState`). If `prefetchQuestions()` throws `"no_cache"` (first launch, no internet), a full-screen overlay blocks the UI with a retry button.
-
-**Theme (`mobile/src/context/ThemeContext.tsx`):** Provides a `theme` object with the same color tokens as the web CSS variables. Dark mode stored via AsyncStorage `"theme"` key.
-
-**Storage (`mobile/src/utils/storage.ts`):** AsyncStorage wrapper with an in-memory cache.
-- `hydrateCache()` — must be awaited at startup before any `lsGet` calls
-- `lsGet(key, fallback)` — synchronous read from cache
-- `lsSet(key, value)` — async write (updates cache + AsyncStorage)
-- Same function signatures as web `storage.js` for parity
-
-**Notifications (`mobile/src/utils/notifications.ts`):** `refreshNotifications(enabled, goalMet)` — cancels all scheduled notifications then re-schedules a daily reminder if `enabled && !goalMet`. Called on app mount and on foreground resume.
-
-**Navigation (`mobile/src/navigation/index.tsx`):** 5-tab bottom navigator; each tab has its own `NativeStack`. Tab icons use `@expo/vector-icons` (Ionicons). No header shown on any screen (`headerShown: false` everywhere).
-
-**Screens (5 in tab nav, in `mobile/src/screens/`):** (`FirstRun/` exists as a file but is not wired into navigation — the no-internet gate is handled inline in App.tsx instead.)
-- `Dashboard` — countdown card, streak/XP grid, quick-access buttons, recent RT results
-- `Tasks` — FlatList MCQ session; saves/restores state via `tasks_session` AsyncStorage key
-- `FormulaCards` — SM-2 spaced repetition; `Animated` rotateY card flip; plain-text formula display (no LaTeX renderer)
-- `Progress` — 4 tabs (Статистика / Темы / РТ-ДРТ / Достижения) + `AddResultModal`
-- `Settings` — theme toggle, daily goal picker, push notification scheduling, `AsyncStorage.clear()` reset
-
-**Daily questions:** Fetched from `https://flux-training.vercel.app/daily-questions.json` (configured in `mobile/src/config.ts`). Same cache structure and invalidation logic as the web app.
-
-**Formula data:** `mobile/src/data/formulas.json` is a copy of `data/formulas.json`. If the master database changes, copy it again.
-
-**No GMS constraint:** No Firebase, FCM, or any Google SDK. Push notifications use `expo-notifications` local scheduling only. `app.json` has `"googleServicesFile": null`. The EAS `preview` profile builds a sideloadable `.apk`.
-
-**Module aliases:** `@/` maps to `mobile/src/` (configured via `babel-plugin-module-resolver` in `babel.config.js` and `tsconfig.json` paths).

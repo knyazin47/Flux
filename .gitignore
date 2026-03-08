@@ -68,8 +68,3 @@ scripts/.env
 # Claude Code local settings (contain machine-specific paths)
 .claude/settings.local.json
 
-# Expo / EAS local state
-.expo/
-mobile/.expo/
-mobile/android/
-mobile/ios/
